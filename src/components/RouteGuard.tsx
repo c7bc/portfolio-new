@@ -30,12 +30,12 @@ const RouteGuard: React.FC<RouteGuardProps> = ({ children }) => {
 
       const normalizePath = (p?: string) => {
         if (!p) return "/";
-        // remove leading locale segments like /pt, /pt-BR, /en, /en-US
+        // remove leading locale segments like /pt, /pt-BR, /en, /en-US, /es, /fr etc.
         const segments = p.split("/").filter(Boolean);
         if (segments.length === 0) return "/";
         const first = segments[0];
-        // matches 'pt', 'en' or 'pt-BR', 'en-US', etc.
-        if (/^(en|pt)(?:-[A-Za-z]{2,})?$/.test(first)) {
+        // matches two-letter locale optionally followed by -REGION (pt, en, es, fr, en-US, pt-BR)
+        if (/^[a-z]{2}(?:-[A-Za-z]{2,})?$/.test(first)) {
           const rest = segments.slice(1);
           return rest.length === 0 ? "/" : `/${rest.join("/")}`;
         }

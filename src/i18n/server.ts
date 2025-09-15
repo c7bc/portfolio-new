@@ -13,9 +13,6 @@ try {
   // noop fallback
 }
 
-import en from "@/i18n/messages/en.json";
-import pt from "@/i18n/messages/pt.json";
-
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export type Messages = Record<string, any>;
 
@@ -39,11 +36,17 @@ export async function detectLocale(): Promise<string> {
   }
 }
 
-// Simple in-memory cache (module scope) for messages
-const messagesCache: Record<string, Messages> = { en, pt };
-
 export async function getMessages(locale: string): Promise<Messages> {
-  return messagesCache[locale] || en;
+  try {
+    switch (locale) {
+      case "pt":
+        return (await import("@/i18n/messages/pt.json")).default;
+      default:
+        return (await import("@/i18n/messages/en.json")).default;
+    }
+  } catch {
+    return (await import("@/i18n/messages/en.json")).default;
+  }
 }
 
 export function tServer(

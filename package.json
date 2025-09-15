@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "next dev",
     
-    "build": "next build && mkdir -p .next/standalone/src/i18n && cp -r src/i18n/messages .next/standalone/src/i18n/",
+    "build": "next build",
     "biome-write": "npx @biomejs/biome format --write .",
     "start": "next start",
     "lint": "next lint"
