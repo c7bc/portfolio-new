@@ -31,13 +31,22 @@ const RouteGuard: React.FC<RouteGuardProps> = ({ children }) => {
       const checkRouteEnabled = () => {
         if (!pathname) return false;
 
-        if (pathname in routes) {
-          return routes[pathname as keyof typeof routes];
+        // FIX: Strip locale from pathname before checking
+        let pathToCheck = pathname;
+        if (pathToCheck.startsWith('/pt') || pathToCheck.startsWith('/en')) {
+          pathToCheck = pathToCheck.substring(3);
+          if (pathToCheck === '') {
+            pathToCheck = '/';
+          }
+        }
+
+        if (pathToCheck in routes) {
+          return routes[pathToCheck as keyof typeof routes];
         }
 
         const dynamicRoutes = ["/blog", "/work"] as const;
         for (const route of dynamicRoutes) {
-          if (pathname?.startsWith(route) && routes[route]) {
+          if (pathToCheck?.startsWith(route) && routes[route]) {
             return true;
           }
         }
