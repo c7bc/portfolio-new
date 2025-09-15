@@ -28,36 +28,37 @@ const RouteGuard: React.FC<RouteGuardProps> = ({ children }) => {
       setIsPasswordRequired(false);
       setIsAuthenticated(false);
 
-      const checkRouteEnabled = () => {
-        if (!pathname) return false;
-
-        // FIX: Strip locale from pathname before checking
-        let pathToCheck = pathname;
-        if (pathToCheck.startsWith('/pt') || pathToCheck.startsWith('/en')) {
-          pathToCheck = pathToCheck.substring(3);
-          if (pathToCheck === '') {
-            pathToCheck = '/';
-          }
+      const normalizePath = (p?: string) => {
+        if (!p) return "/";
+        // remove leading locale segments like /pt, /pt-BR, /en, /en-US
+        const segments = p.split("/").filter(Boolean);
+        if (segments.length === 0) return "/";
+        const first = segments[0];
+        // matches 'pt', 'en' or 'pt-BR', 'en-US', etc.
+        if (/^(en|pt)(?:-[A-Za-z]{2,})?$/.test(first)) {
+          const rest = segments.slice(1);
+          return rest.length === 0 ? "/" : `/${rest.join("/")}`;
         }
+        return p;
+      };
 
-        if (pathToCheck in routes) {
-          return routes[pathToCheck as keyof typeof routes];
-        }
+      const normalized = normalizePath(pathname);
+
+      const routeEnabled = (() => {
+        if (!normalized) return false;
+        if (normalized in routes) return routes[normalized as keyof typeof routes];
 
         const dynamicRoutes = ["/blog", "/work"] as const;
         for (const route of dynamicRoutes) {
-          if (pathToCheck?.startsWith(route) && routes[route]) {
-            return true;
-          }
+          if (normalized.startsWith(route) && routes[route]) return true;
         }
-
         return false;
-      };
+      })();
 
-      const routeEnabled = checkRouteEnabled();
       setIsRouteEnabled(routeEnabled);
 
-      if (protectedRoutes[pathname as keyof typeof protectedRoutes]) {
+      // Check protected routes using normalized path
+      if (protectedRoutes[normalized as keyof typeof protectedRoutes]) {
         setIsPasswordRequired(true);
 
         const response = await fetch("/api/check-auth");
