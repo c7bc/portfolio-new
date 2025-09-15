@@ -1,0 +1,115 @@
+---
+title: "NexoEvent – Construindo uma Plataforma Modular de Operações & Ticketing"
+publishedAt: "2025-09-08"
+summary: "Plataforma de operações de eventos multi-tenant: agendamento, ticketing, controle de acesso, permissões, analytics e exportação. (Em desenvolvimento ativo)"
+images:
+  - "/images/projects/nexoevent/cover-01.jpg"
+  - "/images/projects/nexoevent/cover-02.jpg"
+  - "/images/projects/nexoevent/cover-03.jpg"
+  - "/images/projects/nexoevent/cover-04.jpg"
+team:
+  - name: "Daniel Neri"
+    role: "Founder & CTO"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/daniel-neri-51a7b12b3/"
+status: "Em Desenvolvimento"
+---
+
+## Visão Geral
+
+O NexoEvent é uma plataforma ponta a ponta de operações de eventos focada em confiabilidade, clareza de permissões e extensibilidade.  
+Unifica domínios que normalmente ficam dispersos:
+
+- Ciclo de vida de eventos (rascunho → agendado → ao vivo → encerrado → arquivado)  
+- Ticketing (emissão, validação, revogação, transferência & auditoria)  
+- Controle de acesso (zonas, checkpoints, sessões de escaneamento, telemetria de portões)  
+- Papéis e permissões (organizador, staff especializado, escopos financeiros / analytics)  
+- Exportações de dados (webhooks, CSV, JSON estruturado, futuros conectores BI)  
+- Analytics (curva de presença, throughput de escaneamento, receita por tipo, funil de conversão)  
+
+Abordagem “arquitetura primeiro”: modelar entidades canônicas, reforçar invariantes no banco (constraints + RLS) e expor endpoints públicos versionados antes de expandir camadas de UI.  
+Inicia como monólito modular (pacotes: eventos, tickets, acesso, permissões, analytics, export) com desenho preparado para extração seletiva (ex.: escaneamento de alto volume ou faturamento) quando houver tração.
+
+## Principais Funcionalidades
+
+- **Engine de Ciclo de Vida de Eventos**  
+  Máquina de estados explícita com guardas; evita transições inválidas (ex.: emitir tickets após encerramento sem override autorizado).  
+- **Modelo de Ticket & Integridade**  
+  Tipos (geral, tierizado, assento, convite) normalizados em registro único de emissão. Transferências e revogações geram eventos imutáveis preservando origem.  
+- **Framework de Papéis / Capacidades**  
+  Mapeamento por capacidades (EVENT.PUBLISH, TICKET.REISSUE, ACCESS.SCAN) em vez de condicionais dispersas; papéis são agregados declarativos.  
+- **RLS (Row-Level Security)**  
+  Políticas no PostgreSQL isolam organizadores; tokens de staff carregam escopos. Evita vazamento de metadados entre locatários em consultas de analytics.  
+- **Controle de Acesso & Sessões de Escaneamento (Parcial / Planejado)**  
+  Sessões de checkpoint com chaves efêmeras assinadas; eventos de escaneamento (SCAN_ACCEPTED, SCAN_REJECTED_*). Futuro modo offline com pacote pré‑assinado para conectividade instável.  
+- **Camada de Exportação & Integração**  
+  Webhooks assinados em eventos de domínio (EVENT_PUBLISHED, TICKET_ISSUED, TICKET_TRANSFERRED). Exportações agendadas (CSV / JSON) e URLs de feed assinadas para BI externo.  
+- **Auditoria & Compliance**  
+  Tabela append‑only para ações privilegiadas (grants de permissão, overrides, reembolsos). Planejada resistência a adulteração (cadeia de hashes).  
+- **Fundação de Analytics**  
+  Views materializadas / agregações incrementais planejadas: presença no tempo, receita por tipo de ticket, taxa de falha de escaneamento, funil (emissão → escaneado).  
+- **Localização & Fuso Horário Confiável**  
+  Campos temporais em UTC + campo de timezone para renderização correta em múltiplas regiões.  
+- **Ganchos de Observabilidade**  
+  Logs estruturados com IDs de correlação, primeiros esboços de métricas (latência, erros categorizados) para SLOs futuros.  
+- **Billing Plugável (Futuro)**  
+  Fronteira de adaptação (Stripe ou abstração) desenhada; eventos de faturamento desacoplados da emissão de tickets.  
+
+## Tecnologias Utilizadas
+
+- **Backend (TypeScript + Next.js App Router)**: Server Components + Server Actions para mutações seguras no dashboard.  
+- **PostgreSQL (Supabase)**: Armazenamento principal com constraints, RLS, colunas geradas, índices parciais (status, event_id, ticket_type).  
+- **Funções PL/pgSQL**: Transições de estado e emissão atomicamente (issue_ticket, transition_event_state).  
+- **Edge Functions (Planejado)**: Lógica leve de validação / disparo de webhooks próximo ao cliente (redução de latência de escaneamento).  
+- **Tailwind + Design System**: UI consistente e tematizável.  
+- **React Hook Form + Zod**: Validação de ponta a ponta com inferência de tipos.  
+- **Supabase Auth**: Autenticação + claims JWT com capacidades.  
+- **RLS & Policies**: Isolamento estrito multi‑tenant e escopos de staff.  
+- **Webhooks (Planejado)**: Assinatura HMAC + proteção contra replay idempotente.  
+- **Jobs Assíncronos (Planejado)**: Fila para exportações, materialização de analytics, geração de PDFs de tickets.  
+- **Qualidade / CI (Planejado)**: Type check, detecção de drift de migração, testes de integração, smoke de performance.  
+
+## Desafios e Aprendizados
+
+1. **Explosão de Permissões**  
+   Checagens ad hoc escalam mal. Taxonomia de capacidades formalizada cedo reduz complexidade condicional.
+
+2. **RLS vs Performance**  
+   Filtros de segurança podem mascarar consultas ineficientes. Índices compostos e alinhamento de predicados mantiveram latência baixa.
+
+3. **Estado Mutável vs Auditoria Imutável**  
+   Reatribuição de tickets sem log histórico destrói rastreabilidade. Padrão: linha “corrente” + eventos de auditoria anexados.
+
+4. **Coerência de Ciclo de Vida**  
+   Funções atômicas no banco evitam estados parcialmente aplicados em transições de evento.
+
+5. **Exportação Confiável**  
+   Webhooks + batches exigiram idempotência (fingerprints) e proteção contra reprocessamento.
+
+6. **Projeção de Escaneamento Antecipada**  
+   Definição antecipada do schema de evento de escaneamento evita redesign quando métricas de latência e device tracking forem adicionadas.
+
+7. **Evitar Microservices Precoce**  
+   Domínios modularizados internamente preservam clareza sem multiplicar pontos de falha antes de tração real.
+
+8. **Precisão em Analytics**  
+   Agregações “on-the-fly” seriam caras com crescimento; planejamento de materialização incremental garante previsibilidade futura.
+
+## Resultado
+
+NexoEvent está em desenvolvimento ativo. Estado atual:
+- Modelo central (eventos, tickets, papéis/capacidades, auditoria) definido e validado.
+- Políticas RLS rascunhadas; resolução de permissões conectada à camada de auth.
+- Funções de transição e emissão prototipadas.
+- Base de observabilidade (logs estruturados + IDs de correlação) pronta; métricas em preparação.
+
+Próximos marcos:
+- Fluxo de sessão de escaneamento + chaves efêmeras assinadas.
+- Subsistema de webhooks (entrega, retry, backoff).
+- Estratégia de materialização de analytics.
+- Agendamento de exportações + integração de billing.
+- Endurecimento da auditoria (cadeia de hashes / assinaturas).
+
+A arquitetura posiciona o NexoEvent para crescimento seguro multi‑tenant, transparência operacional e expansão integrada — mesmo antes do lançamento público.
+
+*Status:* Em andamento — não lançado; domínios sendo iterativamente fortalecidos antes de escalar e extrair serviços.

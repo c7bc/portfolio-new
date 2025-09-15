@@ -1,0 +1,135 @@
+---
+title: "NexoAgro – Telemetry, Operations & Decision Layer for Agricultural Field Data"
+publishedAt: "2025-09-07"
+summary: "Building a multi‑tenant agro operations platform ingesting IoT + field activity data, enabling spatial analytics, task orchestration, and emerging decision intelligence. (In active development)"
+images:
+  - "/images/projects/nexoagro/cover-01.jpg"
+  - "/images/projects/nexoagro/cover-02.jpg"
+  - "/images/projects/nexoagro/cover-03.jpg"
+team:
+  - name: "Daniel Neri"
+    role: "Founder & CEO / Platform Engineer"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/daniel-neri-51a7b12b3/"
+status: "In Development"
+---
+
+## Overview
+
+NexoAgro is an operations and telemetry platform for agricultural environments, focused on unifying heterogeneous data (sensor streams, manual field logs, task execution, resource usage) into a coherent spatial + temporal model.  
+Core goals:
+- Reliable ingestion of IoT & manual inputs
+- Geospatial awareness (plots, zones, path traces)
+- Time‑series analytics for trends & anomalies
+- Task & workflow orchestration (planned recommendations)
+- Multi‑tenant isolation with auditable actions
+- Foundation for future predictive & advisory modules (yield estimation, input optimization, anomaly detection)
+
+Architecture emphasis: decouple ingestion, normalization, storage, aggregation and insight layers so feature velocity does not compromise data quality or replay capability.
+
+## Key Features
+
+- **Multi‑Source Ingestion Pipeline (Partial)**  
+  Supports device pushes (HTTP / webhook), batched CSV uploads, and manual form entries. Planned MQTT or lightweight streaming gateway for near real‑time sensor bursts (soil moisture, temperature, humidity, equipment status).
+
+- **Spatial Modeling & Plot Hierarchy**  
+  Entities: Farm → Plot → Zone → Asset (equipment / sensor). Geometry stored with standardized SRID; boundary versions maintained for audit & recalculation of historical metrics.
+
+- **Time‑Series Data Layer**  
+  Normalized measurement store (timestamp, source, metric_type, unit, value, geo_ref) enabling clean aggregation; future compression & hypertables (Timescale / partitioned tables) for retention policies.
+
+- **Task & Operations Module**  
+  Tasks (scouting, fertilization, irrigation adjustment) linked to zones and assets; lifecycle states (planned → in_progress → completed → verified). Activity feed ties execution to observed sensor context.
+
+- **Resource & Input Tracking (Planned)**  
+  Application logs (fertilizer, pesticide, water) with dose/per area metrics; correlation to subsequent sensor trends for effect analysis.
+
+- **Anomaly & Threshold Framework (Planned)**  
+  Declarative rule sets (metric > threshold for duration OR delta spike) generating INSIGHT_EVENT records; future ML layer to augment heuristic rules.
+
+- **Offline Sync & Deferred Upload (Planned)**  
+  Mobile client queue storing field entries with conflict resolution (last_write_wins + reconciliation log + optional supervisor override).
+
+- **Embeddings / Similarity (Planned)**  
+  Vector representation of multi-metric snapshots (soil + weather + recent operations) to surface comparable historical contexts for decision hints.
+
+- **Event Bus & Projection Layer**  
+  Internal events: MEASUREMENT_INGESTED, TASK_CREATED, BOUNDARY_UPDATED, THRESHOLD_TRIGGERED enabling projections (dashboards, alert queue, external webhook dispatch).
+
+- **Audit & Traceability**  
+  Append-only audit for boundary edits, manual data corrections, task state overrides. Supports future compliance or agronomic certification requirements.
+
+- **Permissions & Multi‑Tenant Security**  
+  Organization → member roles (viewer, operator, agronomist, admin) mapped to capability sets (DATA.INGEST, TASK.APPROVE, BOUNDARY.EDIT, EXPORT.RUN).
+
+- **Export & Integrations (Planned)**  
+  Scheduled dataset exports (CSV, NDJSON) + aggregated metrics (daily zone summary, cumulative degree days, moisture trend slices) with signed URLs.
+
+## Technologies Used
+
+- **Backend (Go + TypeScript)**: Go ingestion & normalization services; TypeScript (Next.js) dashboard & admin tooling.
+- **PostgreSQL (Core Store)**: Relational + spatial (PostGIS planned) + future time‑series partitioning; constraints ensure metric type/unit consistency.
+- **Spatial Extensions (Planned)**: PostGIS for geometry operations (area calculations, containment, proximity).
+- **Time‑Series Strategy**: Native partitioned tables (date/metric) with partial indexes; optional TimescaleDB or custom retention procedures.
+- **Queue / Stream (Planned)**: NATS or Redis Streams for decoupled ingestion → normalization → analytics projection.
+- **Redis (Planned)**: Caching of computed zone summaries, hot metric snapshots, rate limiting device bursts.
+- **Vector Store (Planned)**: pgvector for similarity over multi-metric feature embeddings.
+- **Auth & Security**: JWT / session tokens with capability scoping, potential RLS for strict row isolation under multi-org queries.
+- **Observability**: Structured logging, ingestion latency metrics, ingestion failure counters; planned tracing (OpenTelemetry) and metric cardinality pruning.
+- **Infrastructure**: Dockerized services, Makefile ops tasks, CI (planned) for migrations + schema drift detection.
+- **Validation & Schemas**: JSON schema or Zod (dashboard forms) ensuring consistent measurement and task payload ingestion.
+
+## Challenges and Learnings
+
+1. **Heterogeneous Data Quality**  
+   Devices produce inconsistent units / sampling intervals. Strategy: normalization table + unit canonicalization + rejection log for invalid entries improves downstream reliability.
+
+2. **Spatial Versioning**  
+   Changing plot boundaries invalidates historical area-dependent metrics. Introduced boundary version table with effective ranges enabling recalculation without data loss.
+
+3. **Partition Strategy Trade‑Offs**  
+   Over‑partitioning increases planning overhead; under‑partitioning inflates large scans. Balanced by grouping partitions monthly per metric category & indexing on (org_id, zone_id, ts).
+
+4. **Schema Evolution vs Velocity**  
+   Locking early schema harms feature iteration. Employed migration discipline + lightweight ADRs to capture rationale & enable controlled change.
+
+5. **Event Ordering & Replay**  
+   Sensor bursts can arrive out-of-order. Sequence numbers & ingestion_timestamp vs event_timestamp allow reordering logic & late arrival handling.
+
+6. **Task Context Coupling**  
+   Embedding too much sensor state in task records bloats storage. Chose indirect linking (task references snapshot ID) enabling rehydration of context on demand.
+
+7. **Anomaly Noise**  
+   Pure threshold rules triggered false positives (diurnal moisture swings). Plan: layered approach (smoothing windows + derivative constraints) before ML introduction.
+
+8. **Performance vs Analytical Flexibility**  
+   Wide denormalized table tempting for dashboards; chose normalized core + materialized views for heavy aggregates to preserve ingestion speed.
+
+9. **Future Predictive Modules**  
+   Avoided premature ML; built feature extraction pipeline (windowed aggregates, lag features) so experimentation can start without major refactors.
+
+10. **Offline Reliability (Planned)**  
+    Conflict scenarios defined early (duplicate manual entries, delayed uploads) preventing ambiguous merges later in mobile client development.
+
+## Outcome
+
+Current state (in development):
+- Core relational schema (farms, plots, zones, assets, measurements, tasks, audit events) established.
+- Ingestion API & normalization pass for basic metrics operational.
+- Boundary versioning & audit scaffold implemented.
+- Event stubs (MEASUREMENT_INGESTED, TASK_CREATED) emitting; projection layer draft.
+- Dashboard early views: zone listing, metric sparkline prototypes, task lifecycle basics.
+- Observability baseline (structured logs + latency timers); failure classification enumerated.
+
+Upcoming milestones:
+- PostGIS integration & spatial queries (containment / overlap checks).
+- Partition strategy refinement & retention policy automation.
+- Threshold engine & anomaly event emission.
+- Offline sync queue definition & mobile client spec.
+- Embeddings + vector similarity prototype for contextual advisories.
+- Materialized analytical views (daily zone summary, cumulative metrics).
+- Export scheduler & webhook delivery reliability.
+
+NexoAgro is not publicly launched; emphasis is on data correctness, extensible domain boundaries and operational clarity before predictive layers and external tenants.
+
+*Status*: Ongoing — iterative hardening prior to public pilot.

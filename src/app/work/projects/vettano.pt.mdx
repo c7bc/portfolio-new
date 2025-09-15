@@ -1,0 +1,110 @@
+---
+title: "Vettano – Arquitetando uma Plataforma Global de Desenho em Tempo Real"
+publishedAt: "2025-09-10"
+summary: "Plataforma de desenho & adivinhação em tempo real com baixa latência, múltiplos modos, hierarquia de papéis, moderação e trilhas de auditoria. (Em desenvolvimento ativo)"
+images:
+  - "/images/projects/vettano/cover-01.jpg"
+  - "/images/projects/vettano/cover-02.jpg"
+  - "/images/projects/vettano/cover-03.jpg"
+  - "/images/projects/vettano/cover-04.jpg"
+team:
+  - name: "Daniel Neri"
+    role: "Founder & CEO / Engenheiro de Plataforma"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/daniel-neri-51a7b12b3/"
+status: "Em Desenvolvimento"
+---
+
+## Visão Geral
+
+O Vettano é um ecossistema multiplayer de desenho & adivinhação em tempo real projetado para tráfego global, baixa latência e extensibilidade. Une:
+- Múltiplos modos estruturados (Clássico, Competitivo, Instantâneo, Digitação e Livre)
+- Sistema configurável de salas (oficiais vs. criadas por usuários, públicas/privadas)
+- Hierarquia de papéis e permissões (Usuário, Moderador, Administrador, Superadministrador)
+- Curadoria e moderação de temas (oficiais e personalizados)
+- Logs persistentes e auditáveis para transparência e governança
+- Futuro split de serviços: API estática/core + serviços dinâmicos (salas, chat, pontuação, eventos)
+
+A abordagem é “core primeiro”: modelagem de domínio, fronteiras claras, ganchos de observabilidade e desenho seguro de dados antes da expansão de features.
+
+## Principais Funcionalidades
+
+- **Orquestração de Salas & Sessões (Parcial / Planejado)**  
+  API REST canônica para criação, configuração, listagem e ciclo de vida (capacidade, modos, região, idioma, privacidade). Futuro despachante em tempo real distribuirá jogadores por nós regionais.
+
+- **Engine Extensível de Modos**  
+  Clássico e Competitivo (rodadas estruturadas); Instantâneo & Digitação (regras reduzidas); Modo Livre (sem restrição para prática/criação). Abstrações separam progressão, política de pontuação, tempo e persistência.
+
+- **Hierarquia de Papéis & Capacidades**  
+  Usuário (temas & salas personalizadas) → Moderador (temas oficiais dentro de quota) → Administrador (gestão total de conteúdo & disciplina) → Superadmin (governança). Permissões por capacidades em vez de condicionais espalhados.
+
+- **Gerenciamento & Moderação de Temas**  
+  Temas oficiais e criados por usuários com máquina de estados: rascunho → pendente → aprovado/rejeitado → depreciado. Logs com proveniência (autor, tempo, ação).
+
+- **Auditoria & Logs Estruturados**  
+  Registro append‑only planejado para: banimentos, mudanças de configuração, aprovação de temas, escalonamento de papéis, mutações críticas.
+
+- **Segurança & Anti‑Abuso (Em Progresso)**  
+  Limitação de taxa em chat/eventos, flags de conteúdo ofensivo (inicialmente manual), modelo de suspensão temporária, trilha de revisão.
+
+- **Pontuação & Ranking**  
+  Núcleo de progressão modular por modo. Futuro: ranking normalizado tipo elo sazonal e detecção de outliers.
+
+- **Internacionalização & Consciência Regional**  
+  Atributo de região por sala + planejamento de roteamento por latência; idiomas para descoberta.
+
+- **Barramento de Eventos (Planejado)**  
+  Tipos internos: ROOM_CREATED, THEME_PUBLISHED, ROLE_CHANGED, PLAYER_BANNED → alimentando projeções (analytics, feed, notificações).
+
+- **Integridade & Recuperação de Dados**  
+  Soft delete + estratégia de arquivamento para entidades recuperáveis (temas, salas) e futuro restore pontual para reversões administrativas.
+
+- **Design para Futuro Microsserviços**  
+  Começo como monólito modular (pacotes de domínio: temas, salas, auth, papéis) → extração seletiva (pontuação, moderação, notificações) conforme tração.
+
+## Tecnologias Utilizadas
+
+- **Backend (Go)**: Pacotes de domínio, handlers HTTP (chi / net/http), planejamento de façade gRPC para camada em tempo real.
+- **TypeScript (Suporte / SDK)**: SDK/admin e futura CLI interna para migrações e seed.
+- **PostgreSQL**: Banco primário; estratégia RLS (planejada), índices compostos para consultas de sala por status + região, enums para modo/estado.
+- **Redis (Planejado)**: Estado efêmero (presença de sala, fila de matchmaking, contadores de rate limit).
+- **WebSockets (Planejado)**: Broadcast por canal de sala + diffs de estado.
+- **Fila / MQ (Planejado)**: NATS ou Redis Streams para propagação confiável de eventos e moderação assíncrona.
+- **Observabilidade (Baseline)**: Logs estruturados (zerolog), IDs de correlação, planejamento de traces OpenTelemetry + métricas (latência p95, throughput de entrada/saída, orçamentos de erro).
+- **Segurança**: Tokens JWT/sessão rotacionáveis, checagem de capacidades, rate limiting (token bucket), normalização e validação de entrada.
+- **Ferramentas**: Makefile, Docker; futuro IaC (Terragrunt) para infra reproduzível.
+- **CI/CD (Planejado)**: Pipeline de lint + testes unitários e de contrato, scan de contêiner e detecção de drift de migração.
+
+## Desafios e Aprendizados
+
+1. **Equilíbrio Entre Escopo Inicial e Integridade de Núcleo**  
+   Evitar microservices precoce mantendo limites claros dentro de um só repositório reduz complexidade cognitiva inicial.
+
+2. **Explosão de Permissões**  
+   Checagens dispersas se tornam frágil rapidamente. Solução: tabela de capacidades + papéis como agregados declarativos.
+
+3. **Workflow de Moderação de Temas**  
+   Máquina de estados explícita previne estados intermediários inválidos e simplifica a UI.
+
+4. **Performance Futura em Tempo Real**  
+   Desenho das APIs preparado para amplificação WebSocket (consultas indexadas, payload estável) reduz refatorações futuras.
+
+5. **Modelo de Auditoria**  
+   Apenas log não basta; requer estrutura (ator, alvo, razão, hash contextual) rumo a imutabilidade futura.
+
+6. **Isolamento de Modos**  
+   Interfaces (Controlador de Fase, Política de Pontuação, Perfil de Timer) evitam condicionais espalhadas.
+
+7. **Evitar Sobre‑Engenharia**  
+   Complexidades (ML, ranking avançado, event sourcing) adiadas até evidência de uso.
+
+## Resultado
+
+O Vettano está em desenvolvimento ativo:  
+- Modelos centrais (salas, temas, papéis, eventos de auditoria) definidos  
+- Fundação REST & padrões de permissão mapeados  
+- Desenho inicial de observabilidade e estratégia de índices elaborado  
+Próximos marcos: serviço de sessão em tempo real, enforcement completo de moderação, engine de pontuação persistente e expansão de segurança do jogador.  
+Mesmo pré‑lançamento, a arquitetura posiciona o Vettano para crescimento escalável multi‑modo com transparência operacional e extensibilidade.
+
+*Status*: Em andamento — não lançado publicamente; funcionalidades sendo endurecidas antes da camada em tempo real.

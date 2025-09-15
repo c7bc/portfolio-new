@@ -1,0 +1,102 @@
+---
+title: "TradingAlive – Companion de Alertas TradingView em Tempo Real (Flutter + Backend) (Freelance)"
+publishedAt: "2025-09-04"
+summary: "Projeto freelance: app Flutter + backend para ingerir webhooks do TradingView, normalizar sinais e enviar notificações em tempo real com watchlists, mapeamento multi‑exchange e métricas de latência."
+images:
+  - "/images/projects/tradingalive/cover-01.jpg"
+  - "/images/projects/tradingalive/cover-02.jpg"
+  - "/images/projects/tradingalive/cover-03.jpg"
+  - "/images/projects/tradingalive/cover-04.jpg"
+team:
+  - name: "Daniel Neri"
+    role: "Freelancer Engenheiro Mobile & Backend / Designer"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/daniel-neri-51a7b12b3/"
+engagement: "Freelance"
+status: "Entregue (MVP em Produção)"
+---
+
+## Visão Geral
+
+TradingAlive entrega ao trader um canal móvel focado para alertas críticos derivados de estratégias/indicadores do TradingView.  
+Atuação ponta a ponta: backend (ingestão + regras) + app Flutter + design em Figma.  
+Objetivo: reduzir alertas perdidos e dar contexto estruturado (símbolo, timeframe, estratégia, direção, força) com visibilidade de latência.
+
+## Principais Funcionalidades
+
+- **Ingestão de Webhook**  
+  Endpoint recebe JSON; valida segredo; usa chave de idempotência contra duplicatas.
+
+- **Normalização de Alertas**  
+  Parsing extrai símbolo, exchange, timeframe, estratégia, direção, tags de confiança, triggered_at. Fallback resiliente para formatos customizados.
+
+- **Mapeamento Multi‑Exchange**  
+  Converte “BINANCE:BTCUSDT” para forma normalizada garantindo filtros corretos.
+
+- **Watchlists & Filtros**  
+  Usuário segue símbolos / estratégias; entrega apenas alertas relevantes. Cache local para modo offline.
+
+- **Pipeline de Push**  
+  Backend → FCM com payload estruturado (direção, timeframe, latência). Centro de alertas no app lista histórico com semântica de cor.
+
+- **Métricas de Latência**  
+  tv_received_at → processed_at → push_dispatched_at → client_received_at (quando disponível) para p50/p95.
+
+- **Dedup & Controle de Burst**  
+  Supressão em janela deslizante para sinais idênticos em poucos segundos.
+
+- **Tagging de Severidade / Estratégia**  
+  Classificação (scalp / swing / macro) com ícones; reordenação de prioridade.
+
+- **Theming & Design System**  
+  Tokens claro/escuro do Figma → ThemeData Flutter mapeando cores/elevação.
+
+- **Cache Offline**  
+  Últimos N alertas guardados localmente (SQLite / Hive) para consulta offline.
+
+## Tecnologias Utilizadas
+
+- **Flutter (Dart)**: UI cross‑platform; gerenciamento de estado (provider / riverpod); persistência local.
+- **Backend (Node / Express ou Go)**: Rota de webhook, normalização, push, métricas.
+- **TypeScript**: Tipagem (se Node).
+- **PostgreSQL**: Usuários, watchlists, alert events, estratégias, mapping.
+- **Redis (Opcional)**: Dedup/ burst, cache quente.
+- **FCM**: Notificações push.
+- **Figma**: Biblioteca + tokens.
+- **Zod / Joi**: Validação de payload.
+- **OpenTelemetry (Parcial)**: Traço ingestão→envio (planejado).
+
+## Desafios e Aprendizados
+
+1. **Variabilidade de Payload** – Parsing em camadas + logs de rejeição.  
+2. **Transparência de Latência** – Métricas expostas aumentam confiança.  
+3. **Burst / Duplicatas** – Idempotência + TTL em Redis.  
+4. **Limites de Push** – Agrupamento de baixa prioridade.  
+5. **Normalização de Símbolos** – Evita falhas de filtro.  
+6. **Escalabilidade Simples** – Adiado streaming complexo; stateless ingest suficiente.  
+7. **UX Alta Frequência** – Agrupamento + triagem por swipe.  
+8. **Consistência Offline** – Escritas idempotentes previnem duplicação após replay.  
+9. **Drift de Tokens de Design** – Export automático do Figma reduz divergência.  
+10. **Segurança do Webhook** – Segredo compartilhado + possível allowlist.
+
+## Resultado
+
+MVP entregue com:
+- Ingestão confiável e modelo de evento normalizado
+- Push em tempo real dentro da meta de latência
+- Filtros/watchlists precisos reduzindo ruído
+- App Flutter (Android/iOS) com histórico, filtros, tema
+- Base de instrumentação e taxonomia de erros
+
+Impacto: maior rapidez de reação e menor fragmentação (comparado a email / desktop).
+
+*Status*: MVP ao vivo; roadmap aberto para analytics e integrações de corretora.
+
+---
+
+## Futuras Extensões
+
+- Backtesting de performance da estratégia  
+- Integração de execução (broker API)  
+- ML on‑device para relevância  
+- Correlação multi‑sinal (confirmação composta)

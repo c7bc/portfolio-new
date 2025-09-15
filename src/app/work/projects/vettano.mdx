@@ -1,0 +1,110 @@
+---
+title: "Vettano – Architecting a Global Real‑Time Drawing & Guessing Platform"
+publishedAt: "2025-09-10"
+summary: "Design and development of a multi‑region, low‑latency real‑time drawing platform with modular game modes, role hierarchy, anti‑abuse systems, and auditability. (In active development)"
+images:
+  - "/images/projects/vettano/cover-01.jpg"
+  - "/images/projects/vettano/cover-02.jpg"
+  - "/images/projects/vettano/cover-03.jpg"
+  - "/images/projects/vettano/cover-04.jpg"
+team:
+  - name: "Daniel Neri"
+    role: "Founder & CEO / Platform Engineer"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/daniel-neri-51a7b12b3/"
+status: "In Development"
+---
+
+## Overview
+
+Vettano is a real‑time multiplayer drawing & guessing ecosystem engineered for global traffic, low latency, and extensibility. It unifies:
+- Multiple structured game modes (Classic, Competitive, Instant, Typing, Free)
+- A configurable room system (official vs. user‑created, public/private)
+- A hierarchical role and permission architecture (User, Moderator, Administrator, Superadmin)
+- Thematic curation (official & user themes with moderation workflow)
+- Persistent audit logs for transparency, moderation, and future compliance
+- A future service split: static/core API + dynamic real‑time services (rooms, chat, scoring, events)
+
+The platform is being built with a “core first” approach: domain modeling, isolation boundaries, observability hooks and secure data design precede feature fan‑out.
+
+## Key Features
+
+- **Room & Session Orchestration (Planned + Partial)**  
+  Canonical REST API for creation, configuration, listing and lifecycle state of rooms (capacity, modes, regional preferences, language, privacy flags). Future real‑time dispatcher will shard players across regional nodes.
+
+- **Multi Game Modes (Extensible Engine)**  
+  Classic & Competitive with structured rounds; Instant & Typing with reduced rules; Free Mode for unconstrained creative sessions. Engine abstractions separate: turn progression, scoring policy, time budget, and artifact persistence.
+
+- **Role & Permission Hierarchy**  
+  User (custom themes & rooms) → Moderator (official theme creation/edit within quotas) → Administrator (full content & disciplinary controls) → Superadmin (platform governance). Permissions mapped to capability sets rather than hard‑coded switches.
+
+- **Theme Management & Moderation Pipeline**  
+  Official vs. user‑generated themes with submission states: draft → pending review → approved/rejected. Moderation logs + action provenance stored for auditability.
+
+- **Audit & Action Logging**  
+  Structured immutable append (planned WORM pattern) for: bans, room config changes, theme approvals, role escalations, critical system mutations.
+
+- **Player Safety & Anti‑Abuse (In Progress)**  
+  Offensive content flagging (manual now → future ML heuristics), rate limiting for chat/events, ban & temporary suspension model, escalation thresholds.
+
+- **Scoring & Ranking Core**  
+  Score progression modularized per mode. Future: normalized elo‑like ranking service with season rotations and outlier detection for anomalous boosts.
+
+- **Internationalization & Regional Awareness**  
+  Region attribute at room + planned latency probing to direct players to nearest real‑time cluster; language tags for discoverability.
+
+- **Extensible Event Bus (Planned)**  
+  Internal event types: ROOM_CREATED, THEME_PUBLISHED, ROLE_CHANGED, PLAYER_BANNED → enabling projections (analytics, feed, notifications).
+
+- **Data Integrity & Recovery**  
+  Soft deletes + archival strategy for recoverable entities (themes, rooms) with future point‑in‑time restore for administrative reversals.
+
+- **Design for Future Microservices**  
+  Start as a modular monolith exposing clean domain packages (themes, rooms, auth, roles) → selective extraction: scoring service, moderation engine, notification dispatcher.
+
+## Technologies Used
+
+- **Backend Core (Go)**: Domain‑driven modular packages, HTTP handlers (chi / net/http pattern), planned gRPC façade for real‑time edge services.
+- **TypeScript (Support / Tooling)**: SDK & admin panel integration; future internal CLI for migrations & seeding.
+- **PostgreSQL**: Primary datastore; row‑level security strategy (planned for multi‑tenant or segmented admin zones), composite indexes for room + status + region queries, enum domains for mode/state.
+- **Redis (Planned)**: Ephemeral state (room presence, matchmaking queue candidates, rate limiter counters).
+- **WebSockets (Planned Real‑Time Layer)**: Event broadcasting per room channel + ephemeral state diffs.
+- **Message Queue (Planned)**: NATS or Redis Streams for cross‑service event propagation & reliable moderation tasks.
+- **Observability (Baseline)**: Structured logging (zerolog), correlation IDs, planned OpenTelemetry traces + metrics (latency p95, join/leave throughput, error budgets).
+- **Security Layers**: JWT or session tokens (rotatable), scoped capability checks, rate limiting (token bucket), input normalization & validation.
+- **Tooling**: Makefile scripts, Docker for environments, future Terragrunt/IaC for infrastructure codification.
+- **CI/CD (Planned)**: Lint + unit + contract test pipeline, container security scanning, migration drift detection.
+
+## Challenges and Learnings
+
+1. **Balancing Early Scope vs. Core Integrity**  
+   Avoiding premature microservices by enforcing clear domain boundaries inside a single codebase first. This reduces cognitive overhead while preserving future extraction paths.
+
+2. **Role & Permission Explosion**  
+   Naive role checks quickly become scattered. Solution: capability registry + mapping table; roles are curated sets of capabilities (THEME.CREATE.OFFICIAL, ROOM.BAN.USER, etc.).
+
+3. **Theme Moderation Workflow**  
+   Need for explicit state machine (draft → pending → approved → deprecated). Simplifies UI logic and prevents half‑approved inconsistent state.
+
+4. **Future Real‑Time Performance**  
+   Designing APIs with future WebSocket amplification in mind (room membership queries are index‑friendly; payload shapes stable). Minimizes refactors when the dynamic service launches.
+
+5. **Audit Trail Design**  
+   Logging alone insufficient — need structured, append-only semantics, actor + target + reason + contextual hash for tamper resistance (future immutable storage or hash chain).
+
+6. **Extensibility of Game Modes**  
+   Mode differences isolated behind an interface: PhaseController, ScorePolicy, TimerProfile. This prevents conditional bloat across handlers.
+
+7. **Preventing Over‑Engineering**  
+   Using “just enough” abstraction; deferring ML classification, advanced ranking and event sourcing until baseline usage validates complexity.
+
+## Outcome
+
+Vettano is actively in development:  
+- Core domain models (rooms, themes, roles, audit events) defined.  
+- REST foundation & permission mapping patterns established.  
+- Observability baseline + indexing strategy drafted.  
+Next milestones: real‑time session service, moderation workflow enforcement, persistent scoring engine, and player safety expansion.  
+Even pre‑launch, the architecture positions Vettano for scalable multi‑mode growth with operational transparency and extensibility.
+
+*Status*: Ongoing — not yet publicly released; features are being iteratively hardened before real‑time layer activation.

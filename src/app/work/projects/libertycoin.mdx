@@ -1,0 +1,114 @@
+---
+title: "LibertyCoin – Web3 Wallet & Token Operations Dashboard (Freelance)"
+publishedAt: "2025-09-03"
+summary: "Freelance delivery of a Web3 dashboard integrating wallet connection, token balance aggregation, transaction history, contract interactions and admin tooling; built with Next.js (frontend), Express (API) and on‑chain provider SDKs plus full Figma design system."
+images:
+  - "/images/projects/libertycoin/cover-01.jpg"
+  - "/images/projects/libertycoin/cover-02.jpg"
+team:
+  - name: "Daniel Neri"
+    role: "Freelance Full‑Stack & Product Designer"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/daniel-neri-51a7b12b3/"
+engagement: "Freelance"
+status: "Delivered (Ongoing Minor Enhancements)"
+---
+
+## Overview
+
+LibertyCoin is a Web3 operations dashboard providing a unified interface for:
+- Connecting EVM wallets (MetaMask / WalletConnect)
+- Aggregating multi‑token balances & fiat equivalents
+- Executing contract method calls (read/write) with guardrails
+- Tracking real‑time transaction status & gas metrics
+- Managing a lightweight admin panel for token distribution campaigns
+
+Project scope: rapid MVP → production hardening in a freelance engagement. I owned product discovery translation, Figma system design, frontend implementation (Next.js + SSR routes), backend API (Express + provider adapters), and integration QA with test networks (Goerli / Sepolia or client‑specified testnets).
+
+## Key Features
+
+- **Wallet Connection Layer**  
+  Unified connect component (MetaMask injection, WalletConnect) with network mismatch detection and chain switching prompt.
+
+- **Token Balance Aggregation**  
+  Batched RPC calls (eth_call multicall) for ERC‑20 balanceOf + decimals + symbol; fiat conversion pipeline via external price API (coalesced rate caching).
+
+- **Transaction Lifecycle Tracking**  
+  Pending → mined → confirmed (N blocks) status streaming with exponential backoff and baseline latency measurement; user notifications on status change.
+
+- **Contract Interaction Console**  
+  Whitelisted contract ABI methods (read + selected write). Form auto‑generates inputs with type validation (uint, address, bytes). Gas estimate preview + manual override.
+
+- **Portfolio Snapshot & History**  
+  Periodic snapshot table (timestamp, token, balance, fiat_estimate) enabling delta charts; transaction history enriched with function signature decoding.
+
+- **Admin Token Distribution (Airdrop Tool)**  
+  CSV upload (address, amount) → validation (dup, format, allowance) → batched transaction execution or merkle-based claim list generation (planned / optional deliverable stub).
+
+- **Role & Permission Hooks**  
+  Basic admin flag gating distribution routes; future expansion stub for multi‑role.
+
+- **Design System (Figma → Code)**  
+  Typography scale, color tokens (light/dark), spacing, button & input primitives; exported token file consumed in styled components / Tailwind layer (project used hybrid approach).
+
+- **Error & Revert Surface**  
+  Rich error parsing (revert reason decoding) surfaced inline to reduce opaque “transaction failed” UX.
+
+## Technologies Used
+
+- **Next.js (App / Pages Hybrid)**: SEO‑friendly marketing + authenticated dashboard, dynamic routes for /tx/[hash], SSR prefetch of token metadata.
+- **Express API**: Auth token verification, proxy to JSON‑RPC providers, rate limiting, signature verification endpoints.
+- **Web3 / Ethers.js**: Provider abstraction, contract interface generation, multicall batching.
+- **TypeScript**: Strict typing across client + server; shared DTOs & ABI method signatures.
+- **Redis (Optional / Deployed if enabled)**: Price cache, recent tx lookups, rate limiter counters.
+- **PostgreSQL (Light Persistence)**: Users, session tokens, portfolio snapshots, admin job audit logs.
+- **Figma**: Component library, auto‑layout patterns, semantic token sheet → exported JSON.
+- **Zod**: Validation for contract write parameters and admin CSV ingestion.
+- **Wagmi / WalletConnect (if allowed)**: Simplified wallet flows (abstracted behind custom hook).
+
+## Challenges and Learnings
+
+1. **RPC Rate & Latency Variance**  
+   Mitigated by batching multicall + fallback to secondary provider; reduced cold load token balance latency.
+
+2. **Gas Estimation Accuracy**  
+   Edge cases (dynamic fee spikes) required re‑estimation right before user confirmation; added “freshness window” for gas preview.
+
+3. **ABI Surface Explosion**  
+   Avoided exposing full arbitrary write access; curated allowlist with metadata (safe / requires caution). Prevented misuse and revert spam.
+
+4. **Balance Snapshot Consistency**  
+   Race between snapshot job and user triggered refresh; introduced snapshot_version and “latest stable” flag.
+
+5. **Fiat Conversion Drift**  
+   Coalescing requests to price API every N seconds reduced jitter; moved conversion to server to avoid leaking API key.
+
+6. **Revert Reason UX**  
+   Many raw errors unreadable. Added error decoder mapping common reason signatures → friendly messages.
+
+7. **Airdrop Validation at Scale**  
+   Large CSV rows caused blocking processing; streamed parse + incremental validation with early rejection summary.
+
+8. **Security Considerations**  
+   Prevented arbitrary contract calls by scoping ABIs; sanitized user-provided addresses, enforced checksummed formatting.
+
+## Outcome
+
+Delivered:  
+- Production‑ready MVP (wallet connect, token balances, transactions, interaction console).  
+- Admin airdrop scaffold + CSV validation workflow.  
+- Figma design system aligned with implemented token set.  
+- Observability baseline (structured logs + error taxonomy + RPC latency metrics).  
+
+Result: Faster manual ops replacement and reduced user friction performing routine token checks & contract interactions.
+
+*Status*: Delivered; minor enhancements & extended airdrop (Merkle claim mode) under consideration.
+
+---
+
+## (Optional) Future Enhancements
+
+- Merkle airdrop builder with proof export  
+- Multi-chain portfolio aggregation (chain registry)  
+- Subscription push (pending → confirmed tx) via WebSocket  
+- Advanced risk flags (low liquidity token detection)

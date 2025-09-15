@@ -1,0 +1,142 @@
+---
+title: "NexoAI – Orquestrando Fluxos Multi‑Provider de LLM e Agente de Código Sensível ao Repositório"
+publishedAt: "2025-09-05"
+summary: "Plataforma de orquestração de IA multi‑tenant com versionamento de prompt, retrieval semântico, abstração de provedores, controle de custos e agente de código ciente do repositório. (Em desenvolvimento ativo)"
+images:
+  - "/images/projects/nexoai/cover-01.jpg"
+team:
+  - name: "Daniel Neri"
+    role: "Founder & CEO / Engenheiro de Plataforma"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/daniel-neri-51a7b12b3/"
+status: "Em Desenvolvimento"
+---
+
+## Visão Geral
+
+O NexoAI é uma plataforma para orquestrar interações de IA entre múltiplos provedores de LLM enquanto oferece um agente de código sensível ao repositório e recursos com retrieval.  
+Focos centrais: consistência, transparência de custo, reprodutibilidade e extensibilidade.
+
+Ele unifica:
+- Ciclo de vida e versionamento de prompts com histórico de diffs
+- Abstração multi‑provider (roteamento, fallback, detecção de capacidades)
+- Embeddings + retrieval semântico (código, docs, metadados)
+- Inteligência de repositório (mapa estrutural, grafo de dependências, hotspots)
+- Respostas em streaming + fila de jobs prolongados
+- Guardrails (rate limit, filtros de toxicidade / tamanho, tetos de tokens)
+- Telemetria de uso & custo (org / usuário / modelo)
+- Camada de ferramentas / plugins (planejado) para edições, scaffolds, refatorações
+
+A arquitetura prioriza execução determinística: cada inferência ou run de agente possui registro de template, variáveis resolvidas, config do modelo, snapshot de contexto de retrieval e estimativa de custo.
+
+## Principais Funcionalidades
+
+- **Camada de Abstração de Provedores**  
+  Interface unificada para OpenAI / Anthropic / local (planejado). Probing de capacidades e fallback dinâmico sob erro ou degradação de SLA.
+
+- **Versionamento de Prompts & Template Engine**  
+  Templates armazenados com variáveis tipadas e metadados (propósito, domínio, notas de segurança). Execuções referenciam versão imutável e parâmetros usados.
+
+- **Core de Embeddings & Retrieval**  
+  pgvector (ou similar) com código chunkado, trechos de README, docs arquiteturais. Pipeline híbrido (semântico + keyword) para ranqueamento. Packing de contexto otimizado a orçamento de tokens.
+
+- **Agente de Código Sensível ao Repositório**  
+  Pré‑análise gera:
+  - Taxonomia de arquivos & grafo de dependência
+  - Fingerprint da stack (frameworks, build)
+  - Hotspots (churn recente, funções grandes)
+  Saída: propostas de patch, diffs multi‑arquivo, comentários arquiteturais, testes iniciais.
+
+- **Fila de Jobs & Execuções Orquestradas**  
+  Execuções longas (indexação completa, refator amplo) em workers com heartbeat e cancelamento.
+
+- **Streaming & Estado Parcial**  
+  WebSocket / SSE (planejado) para tokens incrementais, passos intermediários (razão estruturada) e geração progressiva de diffs.
+
+- **Telemetria de Custo & Uso**  
+  Métricas por modelo: tokens_in, tokens_out, custo efetivo, taxa de fallback, hit ratio de retrieval. Orçamentos / alertas para cada organização.
+
+- **Guardrails & Políticas**  
+  Teto de tokens por tier, corte de prompts excessivos, filtro básico de PII / linguagem inadequada, rate limiting híbrido.
+
+- **Caching & Reuso Semântico**  
+  Cache de embeddings para consultas repetidas; cache de respostas para prompts determinísticos (hash de template + variáveis + modelo).
+
+- **Ferramentas Plugáveis (Planejado)**  
+  Registro de ferramentas com schema de capacidades (file_read, test_generate, dependency_analyze). Agente decide dinamicamente; execuções auditadas.
+
+- **Observabilidade & Rastreabilidade**  
+  Eventos estruturados: PROMPT_EXECUTED, RETRIEVAL_QUERY, PROVIDER_FALLBACK, CACHE_HIT, AGENT_PATCH_GENERATED. IDs de correlação unificam a trilha.
+
+- **Segurança Multi‑Tenant**  
+  Escopo por organização em nível de linha; chaves de API rotacionáveis com escopos finos (read:retrieval, exec:agent, admin:billing).
+
+## Tecnologias Utilizadas
+
+- **Backend (Go + SDK TypeScript)**: Serviços Go para orquestração, queue workers & provider layer; SDK TS para dashboard e integrações.
+- **PostgreSQL + pgvector**: Templates, execuções, embeddings, metadados de retrieval, ledger de custo.
+- **Fila (Planejado: Redis / NATS)**: Jobs assíncronos, retries, dead letter para runs falhos.
+- **Pipeline de Embeddings**: Chunking (heurísticas de código / markdown), detecção de linguagem, ranque híbrido.
+- **Provedores LLM**: Adapters com timeouts dinâmicos, cadeia de fallback & taxonomia de erros normalizada.
+- **Auth**: JWT / sessão com capacidades; tokens de API hash; quotas por org.
+- **Caching**: Memória + persistente (Redis planejado); chave por hash semântico, TTL adaptado.
+- **WebSocket / SSE (Planejado)**: Streaming de tokens e eventos intermediários.
+- **Instrumentação**: Logs estruturados, futuro OpenTelemetry (spans por chamada de provider), métricas (latência p95, throughput de tokens, taxa de fallback).
+- **Diff & Patch**: Esquema unificado (arquivo, operação, hunk) para aplicação determinística.
+- **CI/CD (Planejado)**: Testes de contrato de adapters, harness de carga para retrieval / ingest.
+
+## Desafios e Aprendizados
+
+1. **Variabilidade entre Provedores**  
+   Formatos e limites diferentes → contrato padronizado + normalização de erros simplificam fallback.
+
+2. **Drift de Qualidade de Retrieval**  
+   Busca puramente semântica retornava ruído. Híbrido + chunking consciente de estrutura elevou precisão.
+
+3. **Otimização de Contexto**  
+   Contextos inflados encareciam. Alocador prioriza segmentos por recência + score semântico + peso estrutural.
+
+4. **Confiabilidade de Diffs**  
+   Alucinação de formato mitigada com instruções schema‑first, validação pós‑geração e regeneração seletiva.
+
+5. **Transparência de Custo**  
+   Prompts redundantes detectados; camadas de cache reduziram gasto e revelaram padrões de reuso.
+
+6. **Concorrência & Idempotência**  
+   Execuções simultâneas no mesmo snapshot arriscavam inconsistência. Locks de snapshot + tokens idempotentes resolveram.
+
+7. **Isolamento de Dados**  
+   Pool compartilhado de embeddings arriscaria vazamento. Espaços vetoriais segregados por organização.
+
+8. **Pressão por Sobre‑Engenharia**  
+   Adiado raciocínio multi‑ferramenta profundo até ter base sólida de primitives.
+
+9. **Granularidade de Telemetria**  
+   Logs excessivos geravam ruído; taxonomia de eventos estruturados habilitou sampling inteligente.
+
+10. **Escalonar Re‑Indexação**  
+    Reindexação completa cara; refresh incremental só re‑embebe chunks alterados.
+
+## Resultado
+
+Estado atual (em desenvolvimento):
+- Modelo de template & registro de execução implementado.
+- Abstração de provedores (primário + fallback) rascunhada com adapters parciais.
+- Protótipo de ingestão de embeddings (código + docs) com ranque híbrido.
+- Pré‑processamento de repositório (grafo de arquivos + fingerprint da stack) inicial.
+- Esquema de patch definido; pipeline de diffs em fase de refinamento.
+- Ledger de custo e métricas iniciais por organização estabelecidos.
+- Políticas de guardrail (tetos de tokens, filtros básicos) aplicadas; moderação avançada pendente.
+- Base de observabilidade (eventos estruturados + correlação) ativa; traces detalhados por vir.
+
+Próximos marcos:
+- Canal completo de streaming (tokens + passos intermediários).
+- Framework de ferramentas + primeiras internas (geração de testes, análise de dependência).
+- Refresh incremental de embeddings & scheduler de background.
+- Guardrails avançados (heurísticas semânticas de toxicidade, justiça de rate).
+- Integração de billing & alertas de orçamento.
+- Ranking avançado de retrieval (RRF / híbrido ajustável).
+
+NexoAI ainda não foi lançado publicamente; o foco atual é fortalecer determinismo, segurança e eficiência de custo antes de onboarding externo.
+
+*Status*: Em andamento — ciclo iterativo de estabilidade e confiabilidade antes da liberação ampla.

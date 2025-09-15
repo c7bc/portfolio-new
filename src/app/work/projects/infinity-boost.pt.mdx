@@ -1,0 +1,144 @@
+---
+title: "Infinity Boost – MVP de Marketplace para Bens Digitais & Boosting Estruturado"
+publishedAt: "2025-09-09"
+summary: "Engenharia do MVP de um marketplace multi‑categoria (Roblox + Rocket League inicialmente) com fluxos seguros de pedidos, schemas de boosting estruturado, escrow, disputa e base de auditoria. (Perto do lançamento – em desenvolvimento ativo)"
+images:
+  - "/images/projects/infinity-boost/cover-01.jpg"
+  - "/images/projects/infinity-boost/cover-02.jpg"
+team:
+  - name: "Daniel Neri"
+    role: "Co‑Founder & CTO"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/daniel-neri-51a7b12b3/"
+status: "MVP – Em Desenvolvimento (Pré‑Lançamento)"
+---
+
+## Visão Geral
+
+O Infinity Boost é um marketplace multi‑jogo que unifica:
+- Bens digitais (contas, moedas, itens, top‑ups)
+- Boosting estruturado e custom (fluxo invertido de oferta)
+
+A arquitetura lida com alta variabilidade: cada categoria de jogo (inicial: Roblox, Rocket League) ativa modos de oferta específicos e injeta seu próprio conjunto de validações, enums, metadados, semântica de entrega, regras de precificação e ciclo operacional.
+
+No boosting o fluxo é invertido: comprador publica uma solicitação → boosters enviam ofertas → comprador aceita uma. Nos modos diretos (moeda, conta, item, top‑up) o pedido vai da oferta ao pagamento/entrega. Ênfase: integridade de estados, rastreabilidade, mitigação de risco e extensibilidade futura (novos jogos, inteligência de preço, ranking, KYC).
+
+## Principais Funcionalidades
+
+- **Flags de Recursos por Categoria**  
+  Modelo de categoria define quais modos estão ativos (currency_enabled, accounts_enabled, etc.) → dirige geração dinâmica de formulários e validações.
+
+- **Modos de Oferta (Arquetipos)**  
+  1. Moeda: preço por unidade (price_per_unit), min_quantity, estoque, janela de entrega + janela garantida, device/platform opcional (obrigatório para RL, não para Roblox).  
+  2. Contas: preço fixo, payload de entrega instantânea opcional (credenciais), metadados de plataforma, possível batch futuro.  
+  3. Top Ups: tiers rígidos por categoria (Roblox: 400, 800, 1700… / RL: 500, 1100, 3000…), plataforma onde aplicável; entrega = crédito em conta com SLA.  
+  4. Itens: similar a Contas (preço fixo + entrega instantânea opcional) com metadados (raridade, tipo).  
+  5. Boosting: marketplace invertido de solicitações com schemas estruturados ou custom.
+
+- **Variantes de Boosting**  
+  - Roblox: Grow a Garden, Blox Fruits, Steal a Brainrot, Adopt Me, Blade Ball, Custom (exige game_name + request_description). Flags: stream / offline.  
+  - Rocket League: Rank Boost (current_rank → desired_rank; progressão monotônica), Placement Boost, Net Wins (wins 1..5), Tournament Boost (games 1..15), Custom. Customizações comuns: stream, solo_queue, offline_mode, duo.
+
+- **Ciclo de Oferta (Não Boosting)**  
+  Oferta publicada → Pedido (pagamento / verificação) → Bloqueio em escrow (planejado) → Entrega (automática ou manual) → Confirmação → Liberação / disputa.
+
+- **Ciclo de Solicitação de Boosting**  
+  Solicitação criada → Broadcast para boosters inscritos → Ofertas recebidas → Aceitação de uma (estado in_progress; demais declinadas ou pendentes) → Conclusão (aguarda confirmação) → Fechada / disputada / expirada (TTL).
+
+- **Escrow & Disputa (Planejado)**  
+  Ledger de escrow atrelado ao order_id; disputas bloqueiam liberação até resolução. Ações de disputa auditadas.
+
+- **Notificações & Inscrição**  
+  Tabela de subscription de booster (categorias + variantes) → enfileira notificações em nova solicitação.
+
+- **Auditoria & Compliance**  
+  Log append‑only para transições sensíveis (estado de pedido, entrega de credencial, decisão de disputa, override admin).
+
+- **Risco & Anti‑Abuso (Base)**  
+  Rate limit de criação de solicitações e ofertas repetitivas, detecção de credencial duplicada (hash), flags de preço fora de faixa (abaixo/acima mediana), ganchos futuros de device fingerprint.
+
+- **Papéis & Permissões**  
+  buyer, seller, booster, moderator, admin → capacidades (ORDER.DISPUTE.RESOLVE, REQUEST.ACCEPT, OFFER.SUBMIT) para granularidade.
+
+- **Validação Estruturada**  
+  Validadores de domínio: enums de ranks, plataformas, durações, ranges numéricos, progressão monotônica, requisitos de campos customizados.
+
+- **Expiração & TTL**  
+  Solicitações, ofertas de boosting, entregas não confirmadas, reservas de pagamento monitoradas por expiration_time; varredor em lote transiciona para expired/cancelled.
+
+- **Inteligência Futura (Planejado)**  
+  Sugestão de preço (delta de rank), score de booster (taxa de conclusão, variação de entrega), alertas de SLA dinâmicos.
+
+## Tecnologias Utilizadas
+
+- **Backend (Go)**: Camadas claras (domínio, aplicação, interface, infra); invariantes codificadas em serviços de transição.  
+- **Padrões de Concorrência Go**: Pools de workers (expiração, notificações), context cancellation.  
+- **PostgreSQL**: Schemas centrais (categories, offers, requests, orders, boosting_offers, disputes, escrow_ledger, audit_events). FKs + checks (delivery_duration enum).  
+- **SQL Direto + Mapper Leve**: Transações para transições multi‑passo.  
+- **Fila (Planejado)**: Redis Streams ou NATS para notificações, disputas, expirations.  
+- **Cache (Planejado)**: Redis para median price snapshots, filtros de subscription, contadores de rate limit.  
+- **API HTTP**: Endpoints REST versionados; endpoints administrativos protegidos por capabilities.  
+- **Validação**: Engine central (ranks, durações, ranges, monotonicidade).  
+- **Observabilidade**: Logs estruturados, IDs de correlação, métricas iniciais (taxa de pedidos, transições, índice de disputa). Tracing planejado.  
+- **Segurança**: JWT com claims de papel/capacidade, assinatura HMAC (webhooks futuros), hashing de senhas, rate limiting token bucket.  
+- **Entrega de Credenciais**: Criptografia em repouso (planejada) + revelação única controlada.  
+- **CI/CD (Planejado)**: Análise estática, testes (transições de estado), detecção de drift de migração, build container e scan.  
+- **Infra**: Docker, Makefile, ambientes segregados.  
+
+## Desafios e Aprendizados
+
+1. **Variabilidade Sem Explodir Complexidade**  
+   Flags de recursos + validadores plugáveis substituem cascatas de if/else espalhados.
+
+2. **Complexidade de Schema de Boosting**  
+   Regras de rank e variantes diferentes consolidaram necessidade de registry de schema + monotonic assertions.
+
+3. **Integridade de Máquinas de Estado**  
+   Transições ilegais eram risco. Serviço central que mapeia (estado_atual, ação) → próximo estado com auditoria.
+
+4. **Mitigação de Spam de Ofertas**  
+   Rate limit + deduplicação (preço + delivery_estimate) + base para futuras penalidades de reputação.
+
+5. **Concorrência de Disputa vs Liberação**  
+   Corrida entre liberação e abertura de disputa evitada via guard atômico no finalize.
+
+6. **Escalabilidade de Expiração**  
+   Varredura ingênua substituída por cursor com índice em expiration_time. Previsível em carga.
+
+7. **Drift de Enum / Clientes**  
+   Exposição planejada de endpoint de metadados (enums, durations) para UI dinâmica reduz necessidade de deploy conjunto.
+
+8. **Segurança de Credenciais**  
+   Padrão de envelope criptografado e logging apenas de hash impede vazamento acidental.
+
+9. **Detecção de Preço Fora da Faixa**  
+   Snapshot de mediana + thresholds trouxe base de sinal sem bloquear fluxo legítimo.
+
+10. **Disciplina de Abstração**  
+    Evitou extrair microserviços cedo (escrow, disputa) preservando velocidade. Limites internos sustentam extração futura.
+
+## Resultado
+
+Estado atual do MVP (pré‑lançamento):
+- Schemas, enums e migrações principais implementados.
+- Fluxos de oferta e pedido com transições validadas.
+- Solicitação de boosting + submissão e aceitação de oferta operacionais.
+- Motor de validação estruturada ativo.
+- Emissão de eventos de auditoria para transições críticas.
+- Rate limiting + anti‑spam inicial integrados.
+- Broadcast de notificações (in‑process) funcionando; fila externa planejada.
+- Scaffold de disputa & escrow (schemas + interfaces) criado; lógica parcial.
+- Observabilidade base (logs estruturados, contadores, taxonomia de erros).
+
+Próximos marcos:
+- Regras finais de escrow & gatilhos de liberação.
+- Workflow de disputa (evidências, decisão de moderador).
+- Extração do sistema de notificações para fila resiliente.
+- Criptografia & pipeline de acesso único a credenciais.
+- Cache de preço mediano + surfaced risk flags na UI.
+- Webhooks (order.completed, request.accepted).
+- Perfil de desempenho & teste de carga (tempestade de ofertas).
+
+Infinity Boost está próximo do piloto público; foco atual em robustecer escrow/disputa, consolidar confiabilidade de boosting e reforçar transparência de validação.
+
+*Status*: Desenvolvimento ativo — fase de hardening pré lançamento.

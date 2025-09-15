@@ -1,0 +1,144 @@
+---
+title: "Infinity Boost – MVP Marketplace for Digital Goods & Structured Game Boosting"
+publishedAt: "2025-09-09"
+summary: "Engineering the MVP of a multi‑category digital goods & boosting marketplace (Roblox + Rocket League first) with secure order flows, structured boosting schemas, escrow, dispute & audit foundations. (Near launch – in active development)"
+images:
+  - "/images/projects/infinity-boost/cover-01.jpg"
+  - "/images/projects/infinity-boost/cover-02.jpg"
+team:
+  - name: "Daniel Neri"
+    role: "Co‑Founder & CTO"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/daniel-neri-51a7b12b3/"
+status: "MVP – In Development (Pre‑Launch)"
+---
+
+## Overview
+
+Infinity Boost is an MVP multi‑game marketplace unifying sale and fulfillment of:
+- Digital goods (accounts, currencies, items, top‑ups)
+- Structured & custom boosting (service requests with multi‑booster offers)
+
+The architecture is designed for high domain variability: each game category (initial: Roblox, Rocket League) toggles which offer modes are enabled and injects its own validation schema, enumerations, metadata fields, delivery semantics, pricing constraints and service lifecycles.
+
+Boosting introduces an inverted marketplace flow (buyer posts a request → boosters submit offers → buyer accepts one). Non‑boosting goods follow a direct order purchase flow. Core emphasis: correctness of lifecycle state machines, auditability, fraud risk mitigation and future extensibility (additional games, price intelligence, ranking, KYC).
+
+## Key Features
+
+- **Category Feature Flagging**  
+  Category model enumerates enabled offer modes: currency_enabled, accounts_enabled, topups_enabled, items_enabled, boosting_enabled. Drives dynamic form generation & validation activation.
+
+- **Offer Modes (Product Archetypes)**  
+  1. Currency: unit‑based pricing (price_per_unit), min quantity, stock, delivery window + guaranteed window, optional device/platform dimension (platform required for RL credits, not Roblox).  
+  2. Accounts: fixed price, optional instant delivery payload (credential bundle), structured metadata (platform, security hints), potential batch listing (future).  
+  3. Top Ups: enumeration of rigid tier amounts per category (Roblox: 400, 800, 1700…; RL: 500, 1100, 3000…), platform requirement where applicable. Fulfillment = credited service action with SLA.  
+  4. Items: similar to Accounts (fixed price + optional instant delivery) but semantic field set (rarity, category, cosmetic type).  
+  5. Boosting: inverted request/offer negotiation with structured or custom schemas (Roblox + RL specific variants).
+
+- **Boosting Request Variants**  
+  - Roblox (examples): Grow a Garden, Blox Fruits, Steal a Brainrot, Adopt Me, Blade Ball, Custom Request (requires game_name + request_description). Mode flags: stream / offline.  
+  - Rocket League: Rank Boost (current_rank → desired_rank; enforced monotonic progression), Placement Boost, Net Wins (count), Tournament Boost (games count), Custom Request. Shared customization flags: stream, solo_queue, offline_mode, duo.
+
+- **Offer Lifecycle (Non‑Boosting)**  
+  Offer published → Buyer order created (pending payment / verification) → Escrow lock (planned) → Fulfillment (auto delivery or manual mark) → Confirmation → Settlement / auto‑release or dispute.
+
+- **Boosting Request Lifecycle**  
+  Request created (pending) → Broadcast to subscribed boosters → Offers collected → Buyer accepts one (request => in_progress; others declined / left pending per policy) → Completion (await confirmation) → Closed / disputed / expired (TTL auto‑cancel).
+
+- **Escrow & Dispute Framework (Planned)**  
+  Escrow ledger entries tied to order_id; dispute state overlays lock release. Dispute actions audited (evidence submission, moderator resolution).
+
+- **Notification & Subscription Model**  
+  Booster subscription table: categories + boosting variants → queued notifications (future push / email). Event emission on new request aligns with subscription filters.
+
+- **Audit & Compliance Logging**  
+  Append trail for sensitive transitions: order state changes, credential delivery, dispute decisions, booster acceptance, admin overrides.
+
+- **Risk & Anti‑Abuse (Foundational)**  
+  Rate limits (request creation, offer spam), duplicate credential hash detection, suspicious pricing thresholds (under/over median), future device fingerprint hooks.
+
+- **Role & Permission Model**  
+  Roles: buyer, seller, booster, moderator, admin. Capability mapping (ORDER.DISPUTE.RESOLVE, REQUEST.ACCEPT, OFFER.SUBMIT) prevents conditional scattering.
+
+- **Structured Validation Layer**  
+  Domain validators enforce enumerations (rank sets, platform sets, delivery durations), numeric ranges (wins 1..5, placement games 1..10), monotonic rank progression, presence of required custom fields.
+
+- **Expiration & TTL Policies**  
+  Boosting requests, booster offers, unconfirmed deliveries, payment reservations tracked with expiration_time, background sweeper transitions stale states (pending → expired / cancelled).
+
+- **Future Intelligence Hooks (Planned)**  
+  Price suggestion engine (rank delta heuristics), booster quality scoring (completion ratio, average delivery variance), dynamic SLA warnings.
+
+## Technologies Used
+
+- **Backend (Go)**: Clean architecture layers: domain (entities, invariants), application (use cases), interface (HTTP handlers), infra (repos, queues).  
+- **Go Concurrency Patterns**: Worker pools for expiration sweeps & notification dispatch. Context cancellation for long operations.  
+- **Data Store (PostgreSQL)**: Core relational schemas (categories, offers, requests, orders, offers_boosting, disputes, escrow_ledger, audit_events). Foreign key constraints + check constraints for enumerated sets (delivery_duration enum).  
+- **ORM / Query**: Direct SQL + optional lightweight mapper; transactional wrappers for multi‑step state transitions.  
+- **Queue (Planned)**: Redis Streams or NATS for async notifications, dispute workflow tasks, expiration events.  
+- **Caching (Planned)**: Redis for hot median price snapshots, booster subscription filters, rate limit counters.  
+- **HTTP Layer**: RESTful endpoints with version prefix; planned internal admin endpoints separated by capability layer.  
+- **Validation**: Central schema validators (rank sets, durations, numeric bounds) + compound validations (desired_rank > current_rank).  
+- **Observability**: Structured logs (zerolog), correlation/request IDs, baseline metrics (request rate, state transition counts, dispute ratio). Future tracing (OpenTelemetry) & p95 latency dashboards.  
+- **Security**: JWT tokens with role & capability claims, HMAC signing for sensitive webhooks (future), password hashing (Argon2/Bcrypt), rate limiting (token bucket).  
+- **Delivery Payload Handling**: Encrypted at rest (planned) for account credentials; auto delivery triggers event chain (CREDENTIAL_PUSHED).  
+- **CI/CD (Planned)**: Static analysis, unit + integration tests (state transitions), migration drift detection, container build & vulnerability scan.  
+- **Infrastructure**: Docker dev environment, Makefile task orchestration, environment segregation (dev / staging / prod).  
+
+## Challenges and Learnings
+
+1. **Domain Variability Without Explosion**  
+   Approach: category feature flags + pluggable validation strategy per offer mode rather than branching logic everywhere. Reduces code churn when adding a new game.
+
+2. **Boosting Schema Complexity**  
+   Rank progression & variant‑specific params risk ad hoc checks. Formalized variant schema registry with typed validators and monotonic assertions.
+
+3. **State Machine Integrity**  
+   Orders & requests risk illegal jumps (e.g., confirm before fulfillment). Solution: centralized transition service enforcing permitted (current_state, action) pairs + audit emission.
+
+4. **Preventing Offer Spam**  
+   Boosters spamming trivial offers dilutes buyer experience. Rate limit window + duplicate (price, delivery_estimate) suppression + future scoring weight.
+
+5. **Dispute / Escrow Timing**  
+   Escrow release race conditions if seller submission & dispute open near-simultaneous. Introduced atomic escrow_finalize guard & double‑check of dispute state.
+
+6. **Expiration Scalability**  
+   Naive periodic sweep of all pending entries is wasteful. Batched cursor scanning on indexed expiration_time pre-filter ensures predictable overhead.
+
+7. **Validation Drift**  
+   Enums evolving (delivery durations, rank sets) risk stale clients. Plan: client metadata endpoint (capabilities + enumerations) enabling dynamic UI generation & reducing redeploy friction.
+
+8. **Credential Security**  
+   Storing plaintext is unacceptable. Designed encryption boundary + one‑time revelation pattern (future), logging only hashed envelope IDs to avoid leak.
+
+9. **Pricing Outliers**  
+   Underpriced malicious offers distort trust. Introduced median snapshot + threshold factor; outliers flagged (not rejected yet) for future risk scoring.
+
+10. **Abstraction Discipline**  
+    Resisted premature microservice split (escrow, disputes, boosting engine) to retain iteration velocity. Clear internal package boundaries preserve future extraction path.
+
+## Outcome
+
+Current MVP status (near launch):
+- Core schemas, migrations & primary enums in place.
+- Offer & order lifecycle flows implemented with transition integrity checks.
+- Boosting request creation, booster offer submission & acceptance path operational.
+- Structured validation engine (rank progression, enumerations, ranges) active.
+- Audit event emission for critical transitions established.
+- Rate limiting + basic anti‑spam rules integrated.
+- Initial notification broadcast (in‑process) working; external queue planned.
+- Dispute & escrow scaffolding (schemas + interfaces) defined; business logic partially implemented.
+- Observability baseline: structured logs, key counters, error taxonomy.
+
+Next milestones:
+- Escrow balancing + secure release triggers.
+- Dispute resolution workflow (evidence attachments, moderator decision model).
+- Notification queue extraction & retry semantics.
+- Credential encryption & one‑time access pipeline.
+- Median price cache + risk flag surfacing in UI.
+- Webhooks for state changes (order.completed, request.accepted).
+- Performance profiling & load test for boosting offer storms.
+
+Infinity Boost is close to first public pilot; focus is hardening escrow & dispute safety, finalizing boosting reliability, and tightening validation transparency.
+
+*Status*: Active development — pre‑launch hardening phase.

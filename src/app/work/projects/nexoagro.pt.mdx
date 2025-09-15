@@ -1,0 +1,135 @@
+---
+title: "NexoAgro – Telemetria, Operações e Camada de Decisão para Dados de Campo"
+publishedAt: "2025-09-07"
+summary: "Plataforma multi‑tenant de operações agro que ingere dados de IoT + atividades de campo, habilitando analytics espaciais, orquestração de tarefas e futura inteligência de decisão. (Em desenvolvimento ativo)"
+images:
+  - "/images/projects/nexoagro/cover-01.jpg"
+  - "/images/projects/nexoagro/cover-02.jpg"
+  - "/images/projects/nexoagro/cover-03.jpg"
+team:
+  - name: "Daniel Neri"
+    role: "Founder & CEO / Engenheiro de Plataforma"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/daniel-neri-51a7b12b3/"
+status: "Em Desenvolvimento"
+---
+
+## Visão Geral
+
+O NexoAgro é uma plataforma de operações e telemetria agrícola focada em unificar dados heterogêneos (streams de sensores, registros manuais, execução de tarefas, uso de insumos) em um modelo espacial + temporal coerente.  
+Objetivos centrais:
+- Ingestão confiável de dispositivos e inputs manuais
+- Consciência geoespacial (talhões, zonas, trajetos)
+- Analytics de séries temporais para tendências & anomalias
+- Orquestração de tarefas (recomendações futuras)
+- Isolamento multi‑tenant com ações auditáveis
+- Base para módulos preditivos (estimativa de produtividade, otimização de insumos, detecção de anomalias)
+
+A arquitetura separa ingestão, normalização, armazenamento, agregação e camada de insights — evitando que velocidade de features comprometa qualidade ou repristinabilidade dos dados.
+
+## Principais Funcionalidades
+
+- **Pipeline Multi‑Fonte (Parcial)**  
+  Suporte a pushes de dispositivos (HTTP / webhook), uploads CSV e entrada manual. MQTT ou gateway de streaming planejado para bursts quase em tempo real (umidade do solo, temperatura, status de equipamento).
+
+- **Modelagem Espacial & Hierarquia**  
+  Entidades: Fazenda → Talhão → Zona → Ativo (equipamento / sensor). Geometrias com SRID padronizado; versões de fronteira preservadas para reprocessar métricas históricas.
+
+- **Camada de Séries Temporais**  
+  Armazenamento normalizado (timestamp, fonte, tipo_metrica, unidade, valor, ref_geo) facilitando agregações. Futuro particionamento / hypertables para políticas de retenção.
+
+- **Módulo de Tarefas & Operações**  
+  Tarefas (inspeção, adubação, ajuste de irrigação) vinculadas a zonas e ativos; estados (planejada → em_execucao → concluída → verificada). Feed contextualiza execução com condições sensoriais.
+
+- **Rastreamento de Insumos (Planejado)**  
+  Logs de aplicação (fertilizante, defensivo, água) com dose por área; correlação posterior com métricas sensoriais para análise de efeito.
+
+- **Framework de Anomalias & Limiares (Planejado)**  
+  Regras declarativas (métrica > limiar por intervalo OU spike de variação) gerando eventos INSIGHT; futura camada ML para complementar heurísticas.
+
+- **Sync Offline & Upload Diferido (Planejado)**  
+  Fila local no cliente móvel armazenando registros de campo com resolução de conflitos (last_write_wins + log de reconciliação + override supervisor).
+
+- **Embeddings / Similaridade (Planejado)**  
+  Vetorização de snapshots multi‑métrica (solo + clima + operações recentes) para encontrar contextos históricos análogos e sugerir ações.
+
+- **Barramento de Eventos & Projeções**  
+  Eventos internos: MEDICAO_INGESTIDA, TAREFA_CRIADA, FRONTEIRA_ATUALIZADA, LIMIAR_DISPARADO alimentando dashboards, alertas e webhooks externos.
+
+- **Auditoria & Rastreabilidade**  
+  Registro append‑only para edições de fronteira, correções manuais e overrides de tarefa. Suporta futuras exigências de compliance / certificação.
+
+- **Permissões & Segurança Multi‑Tenant**  
+  Organização → membros (viewer, operador, agrônomo, admin) com capacidades (DADO.INGEST, TAREFA.APROVAR, FRONTEIRA.EDITAR, EXPORT.EXEC).
+
+- **Exportação & Integrações (Planejado)**  
+  Exportações agendadas (CSV, NDJSON) + métricas agregadas (resumo diário de zona, graus-dia acumulados, tendência de umidade) com URLs assinadas.
+
+## Tecnologias Utilizadas
+
+- **Backend (Go + TypeScript)**: Serviços Go para ingestão & normalização; dashboard / tooling em Next.js (TypeScript).
+- **PostgreSQL (Armazenamento)**: Relacional + espacial (PostGIS planejado) + particionamento; constraints garantem consistência tipo/unidade.
+- **Extensões Espaciais (Planejado)**: PostGIS para operações de geometria (área, containment, proximidade).
+- **Estratégia de Série Temporal**: Tabelas particionadas (data/métrica) com índices parciais; possível Timescale ou procedimentos de retenção custom.
+- **Fila / Stream (Planejado)**: NATS ou Redis Streams para desacoplamento ingestão → normalização → projeção.
+- **Redis (Planejado)**: Cache de resumos de zona, snapshots quentes e rate limit de bursts.
+- **Armazenamento Vetorial (Planejado)**: pgvector para similaridade de features agronômicas.
+- **Auth & Segurança**: Tokens JWT / sessão com capacidades; possível RLS para isolamento forte em consultas multi-org.
+- **Observabilidade**: Logs estruturados, métricas de latência de ingestão, contadores de falha; tracing planejado.
+- **Infra**: Serviços dockerizados, Makefile para rotinas, CI (planejado) para migrações e detecção de drift.
+- **Validação**: Schemas (JSON / Zod) garantindo ingestão consistente de medições e tarefas.
+
+## Desafios e Aprendizados
+
+1. **Qualidade de Dados Heterogêneos**  
+   Dispositivos variam em unidade / frequência. Normalização + log de rejeição evita poluir analytics.
+
+2. **Versionamento Espacial**  
+   Mudanças de fronteira quebram métricas históricas se ignoradas. Versões com intervalo efetivo permitem recomputar sem duplicar dados brutos.
+
+3. **Particionamento Adequado**  
+   Particionar demais aumenta custo de planejamento; de menos causa scans grandes. Partições mensais por categoria equilibram desempenho.
+
+4. **Evolução de Esquema vs Velocidade**  
+   Mutações rápidas sem registro geram dívida. ADRs leves + migrations disciplinadas mantêm contexto.
+
+5. **Ordem de Eventos & Replay**  
+   Atrasos ou reenvios exigem distinção ingestion_timestamp vs event_timestamp para reordenação.
+
+6. **Contexto de Tarefa**  
+   Embutir métricas diretamente em tarefas infla armazenamento. Referenciar snapshot reduz duplicação e facilita reprocessamento.
+
+7. **Ruído em Anomalias**  
+   Oscilações diurnas geram falsos alarmes. Estratégia de smoothing + derivadas antes de ML reduz ruído inicial.
+
+8. **Desempenho vs Flexibilidade Analítica**  
+   Tabela wide era tentadora; núcleo normalizado + views materializadas dá equilíbrio.
+
+9. **Planejamento de Módulos Preditivos**  
+   Extratores de features (janelas, lags) preparados antes de treinar modelos previnem refator grande depois.
+
+10. **Confiabilidade Offline (Planejado)**  
+    Definição antecipada de conflitos evita ambiguidade no cliente móvel ao implementar sync.
+
+## Resultado
+
+Estado atual (em desenvolvimento):
+- Esquema central (fazendas, talhões, zonas, ativos, medições, tarefas, auditoria) estabelecido.
+- API de ingestão + passo de normalização para métricas básicas operacional.
+- Versionamento de fronteiras e scaffold de auditoria implementados.
+- Eventos iniciais (MEDICAO_INGESTIDA, TAREFA_CRIADA); camada de projeção rascunhada.
+- Dashboard inicial: listagem de zonas, protótipos de sparklines, ciclo básico de tarefa.
+- Baseline de observabilidade (logs estruturados + timers de latência).
+
+Próximos marcos:
+- Integração PostGIS & consultas espaciais.
+- Refinamento de particionamento + políticas de retenção.
+- Engine de limiares & emissão de anomalias.
+- Definição de fila offline & especificação do cliente móvel.
+- Protótipo de embeddings para similaridade contextual.
+- Views materializadas analíticas (resumo diário, métricas acumuladas).
+- Scheduler de export & entrega de webhooks confiável.
+
+NexoAgro ainda não foi lançado publicamente; foco atual em correção de dados, limites de domínio extensíveis e clareza operacional antes de camadas preditivas e onboarding externo.
+
+*Status*: Em andamento — endurecimento iterativo antes de piloto público.

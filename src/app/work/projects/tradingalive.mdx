@@ -1,0 +1,127 @@
+---
+title: "TradingAlive – Real‑Time TradingView Alert Companion (Flutter + Backend) (Freelance)"
+publishedAt: "2025-09-04"
+summary: "Freelance build of a cross‑platform Flutter app + backend service ingesting TradingView webhooks, normalizing signals, and pushing real‑time notifications with watchlists, multi‑exchange symbol mapping and latency metrics."
+images:
+  - "/images/projects/tradingalive/cover-01.jpg"
+  - "/images/projects/tradingalive/cover-02.jpg"
+  - "/images/projects/tradingalive/cover-03.jpg"
+  - "/images/projects/tradingalive/cover-04.jpg"
+team:
+  - name: "Daniel Neri"
+    role: "Freelance Full‑Stack Mobile & Backend Engineer / Designer"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/daniel-neri-51a7b12b3/"
+engagement: "Freelance"
+status: "Delivered (MVP in Production)"
+---
+
+## Overview
+
+TradingAlive provides traders a focused mobile channel for time‑critical alerts sourced from TradingView strategies & indicators.  
+I delivered the end‑to‑end stack:
+- Backend receiver & rules engine
+- Normalization + persistence
+- Real‑time push & in‑app notification center
+- Flutter mobile (Android/iOS) UI
+- Figma design (theme system + reusable components)
+
+Goal: reduce missed opportunities caused by overloaded email/web alerts, provide structured signal context (symbol, timeframe, strategy, strength) and measure end‑to‑end latency.
+
+## Key Features
+
+- **Webhook Ingestion Endpoint**  
+  TradingView sends JSON payload; signature / shared secret validation; idempotency key to avoid duplicate bursts.
+
+- **Alert Normalization**  
+  Template parsing extracts: symbol, exchange, timeframe, strategy name, direction, confidence tags, triggered_at. Robust fallback for custom user message formats.
+
+- **Multi‑Exchange Symbol Mapping**  
+  Mapping table converts “BINANCE:BTCUSDT” → internal normalized symbol; supports aliasing & future multi‑broker expansion.
+
+- **Watchlists & Filtering**  
+  Users subscribe to symbols / strategies; only matching alerts delivered. Local caching of filters for offline mode.
+
+- **Push Notification Pipeline**  
+  Backend → FCM (Flutter) with structured payload (title, direction, timeframe, delta latency). In‑app channel displays history with color semantics.
+
+- **Latency Metrics**  
+  Timestamps: tv_received_at → processed_at → push_dispatched_at → (optional client_received_at). Generates p50/p95 instrumentation to monitor alert speed.
+
+- **Alert Dedup & Burst Control**  
+  Sliding window suppression for identical repeating signals within X seconds.
+
+- **Severity & Strategy Tagging**  
+  Classification (scalp / swing / macro) icon indicators; user can reorder priority lanes.
+
+- **Theming & UX System**  
+  Light / dark palette in Figma → token JSON → Flutter ThemeData mapping (colors, elevation, semantic roles).
+
+- **Offline Cache**  
+  Last N alerts stored locally (SQLite / Hive) for review when disconnected.
+
+## Technologies Used
+
+- **Flutter (Dart)**: Cross‑platform UI, provider / riverpod (state management), local persistence (Hive or sqflite depending on client preference).
+- **Backend (Node / Express or Go variant)**: Webhook route, validation, normalization pipeline, push scheduling, metrics API.
+- **TypeScript (if Node)**: Strong typing for payload schema.
+- **PostgreSQL**: Users, watchlists, alert events, strategy definitions, symbol mapping.
+- **Redis (Optional)**: Burst dedup counters, recent alert cache.
+- **Firebase Cloud Messaging (FCM)**: Push delivery.
+- **Figma**: Component + icon set + spacing & typography scales.
+- **Zod / Joi**: Payload validation.
+- **OpenTelemetry (Planned / Partial)**: Tracing ingestion→dispatch path.
+
+## Challenges and Learnings
+
+1. **Payload Variability**  
+   Inconsistent custom message templates; solved with layered parsing (regex + key fallback) + validation errors logged (not dropped silently).
+
+2. **Latency Transparency**  
+   Added timestamps at each hop; exposed metrics endpoint so stakeholders could observe improvements.
+
+3. **Duplicate Bursts**  
+   TradingView occasionally re‑fires on reconnect; idempotency key + Redis TTL prevented user spam.
+
+4. **Push Rate & Platform Limits**  
+   Batched low‑priority alerts when volume spiked to avoid FCM throttling; preserved high priority ones.
+
+5. **Symbol Namespace Divergence**  
+   Different exchanges encode pairs differently; normalization layer prevents filter mismatches.
+
+6. **Scalability Simplicity**  
+   Deferred complex stream infra; stateless ingestion + lightweight queue acceptable for early volumes.
+
+7. **Mobile UX for High Frequency**  
+   Introduced grouping (badge counts) and swipe triage to keep notification center usable.
+
+8. **Offline Consistency**  
+   Ensured DB writes idempotent so replays (app restore) didn’t duplicate historical alerts.
+
+9. **Design Token Drift**  
+   Automated export from Figma token sheet reduced manual theme mismatches.
+
+10. **Security of Webhook Endpoint**  
+    Shared secret + optional IP allowlist; HMAC signature considered for later.
+
+## Outcome
+
+Delivered MVP with:
+- Reliable alert ingestion & normalized event model
+- Real‑time push under target median latency
+- Watchlist filter accuracy and reduced noise
+- Flutter app (Android/iOS) featuring history, filtering, theming
+- Instrumentation baseline (latency metrics, error categorization)
+
+Result: Improved trader responsiveness; lower cognitive overhead vs email/desktop fragmentation.
+
+*Status*: Live MVP; potential roadmap for advanced analytics & broker API integration.
+
+---
+
+## Potential Future Enhancements
+
+- Strategy performance backtesting overlay
+- Broker trade trigger API integration
+- Dynamic on‑device ML relevance scoring
+- Advanced alert correlation (multi‑signal confirmation)

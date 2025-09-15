@@ -1,0 +1,97 @@
+{
+  "navigation": {
+    "home": "Início",
+    "about": "Sobre",
+    "work": "Projetos",
+    "blog": "Blog",
+    "gallery": "Galeria"
+  },
+  "ui": {
+    "passwordProtected": "Esta página é protegida por senha",
+    "password": "Senha",
+    "submit": "Enviar",
+    "incorrectPassword": "Senha incorreta",
+    "notFoundTitle": "Página não encontrada",
+    "notFoundDescription": "A página que você procura não existe."
+  },
+  "home": {
+    "latestFromBlog": "Últimos do blog",
+    "earlierPosts": "Publicações anteriores",
+    "title": "Portfólio de {name}",
+    "description": "Site de portfólio mostrando meu trabalho como {role}",
+    "headline": "Engenharia de plataformas multi‑verticais unindo design e código",
+    "subline": "Sou {name}, Engenheiro de Software com mentalidade de produto, criando experiências intuitivas enquanto arquiteturo sistemas ponta a ponta. Nas horas vagas construo minhas próprias plataformas em gaming, IA, marketplaces, eventos e agro.",
+    "featuredWork": "Trabalho em destaque"
+  },
+  "newsletter": {
+    "title": "Assine a Newsletter de {firstName}",
+    "description": "Minha newsletter semanal sobre arquitetura, orquestração de IA e engenharia de produto",
+    "subscribe": "Assinar",
+    "emailPlaceholder": "Email",
+    "invalidEmail": "Por favor insira um email válido."
+  },
+  "post": {
+    "recentPosts": "Postagens recentes",
+    "onThisPage": "Nesta página"
+  },
+  "about": {
+    "scheduleCall": "Agendar uma chamada",
+    "introDescription": "{name} é um(a) {role} baseado(a) no Brasil, focado(a) em transformar ideias de produto complexas em ecossistemas de software coesos e escaláveis. Seu trabalho cobre arquitetura de interfaces, backends distribuídos, SaaS multi‑tenant, integração de recursos de IA e modelagem de domínios em múltiplas verticais.",
+    "work": {
+      "experiences": {
+        "fly": {
+          "role": "Senior Design Engineer",
+          "achievement1": "Redesenhou a UI/UX da plataforma, resultando em +20% de engajamento e carregamentos 30% mais rápidos.",
+          "achievement2": "Liderou a integração de ferramentas de IA nos fluxos de design, permitindo iteração 50% mais veloz."
+        },
+        "creativ3": {
+          "role": "Lead Designer",
+          "achievement1": "Criou um design system que unificou a marca em múltiplas superfícies, elevando a consistência em 40%.",
+          "achievement2": "Liderou equipe multifuncional no lançamento de nova linha de produto, contribuindo para +15% de receita."
+        }
+      }
+    },
+    "studies": {
+      "universityofjakarta": {
+        "description": "Estudou engenharia de software."
+      },
+      "buildthefuture": {
+        "description": "Estudou marketing digital e branding pessoal."
+      }
+    },
+    "technical": {
+      "skills": {
+        "figma": {
+          "description": "Prototipação em Figma com sistemas de componentes e tokens em alta velocidade."
+        },
+        "nextjs": {
+          "description": "Construindo apps modernos com Next.js + design systems + persistência em cloud."
+        }
+      }
+    }
+  },
+  "sections": {
+    "about": {
+      "title": "Sobre – {name}",
+      "description": "Conheça {name}, {role} de {location}",
+      "introduction": "Introdução",
+      "workExperience": "Experiência profissional",
+      "studies": "Formação",
+      "technicalSkills": "Habilidades técnicas"
+    },
+    "blog": {
+      "title": "Escrevendo sobre design e tecnologia...",
+      "description": "Leia o que {name} tem feito recentemente"
+    },
+    "work": {
+      "title": "Projetos – {name}",
+  "description": "Projetos de design e desenvolvimento de {name}",
+  "back": "Projetos",
+  "related": "Projetos relacionados"
+    },
+    "gallery": {
+      "title": "Galeria de fotos – {name}",
+      "description": "Uma coleção de fotos de {name}"
+    }
+  }
+}

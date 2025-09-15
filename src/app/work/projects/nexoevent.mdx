@@ -1,0 +1,115 @@
+---
+title: "NexoEvent – Building a Modular Event Operations & Ticketing Platform"
+publishedAt: "2025-09-08"
+summary: "Designing a multi-tenant event operations platform: scheduling, ticketing, access control, permissions, analytics and export pipelines. (In active development)"
+images:
+  - "/images/projects/nexoevent/cover-01.jpg"
+  - "/images/projects/nexoevent/cover-02.jpg"
+  - "/images/projects/nexoevent/cover-03.jpg"
+  - "/images/projects/nexoevent/cover-04.jpg"
+team:
+  - name: "Daniel Neri"
+    role: "Founder & CTO"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/daniel-neri-51a7b12b3/"
+status: "In Development"
+---
+
+## Overview
+
+NexoEvent is an end‑to‑end event operations platform focused on reliability, permission clarity and extensibility.  
+It unifies core domains commonly fragmented across tools:
+
+- Event lifecycle (draft → scheduled → live → closed → archived)  
+- Ticketing (issuance, validation, revocation, transfer & audit)  
+- Access control (zones, checkpoints, scanning sessions, gate telemetry)  
+- Role & permission layers (organizer, staff roles, finance / analytics scopes)  
+- Data exports (webhooks, CSV, structured JSON feeds, future BI connectors)  
+- Analytics (attendance curves, scan throughput, revenue breakdowns, conversion funnels)  
+
+Architecture first approach: model the canonical entities, enforce invariants at the database layer (constraints + RLS policies), and expose clean, versioned public endpoints before UI expansion.  
+The platform began as a modular monolith with domain packages (events, tickets, access, permissions, analytics, export) and is deliberately structured for future service extraction (e.g. high‑volume scanning or billing).
+
+## Key Features
+
+- **Event Lifecycle Engine**  
+  Explicit state machine with guard clauses; prevents invalid transitions (e.g. issuing tickets after closure without override capability).  
+- **Ticket Model & Integrity**  
+  Ticket types (general, tiered, seat-based, invite-only) unified behind a normalized issuance record. Transfer & revoke operations append to an immutable log to preserve provenance.  
+- **Role / Permission Framework**  
+  Capability-based mapping (e.g. EVENT.PUBLISH, TICKET.REISSUE, ACCESS.SCAN) instead of hard-coded role switches; roles aggregate capabilities enabling fine-grained delegation.  
+- **Row-Level Security (RLS) Strategy**  
+  PostgreSQL RLS policies isolate organizer tenants; staff tokens scoped by capability set. Avoids leaking cross‑organization metadata during analytics queries.  
+- **Access Control & Scanning Sessions (Planned / Partial)**  
+  Checkpoint sessions with ephemeral signing keys; scanning actions produce verifiable events (SCAN_ACCEPTED, SCAN_REJECTED_REASON_DUPLICATE, etc.). Future offline bundle mechanism for intermittent connectivity.  
+- **Export & Integration Layer**  
+  Webhooks triggered on key domain events (EVENT_PUBLISHED, TICKET_ISSUED, TICKET_TRANSFERRED). Scheduled batched exports (CSV / JSON) and signed feed URLs for external BI ingestion.  
+- **Audit & Compliance Log**  
+  Append-only audit table for privileged actions (permission grants, forced state overrides, manual refunds). Planned tamper resistance via hash chaining.  
+- **Analytics Foundation**  
+  Materialized views / incremental aggregations planned: attendance over time, revenue per ticket type, scan failure ratio, conversion funnel (issue → scan).  
+- **Localization & Timezone Safety**  
+  All event temporal fields stored in UTC with explicit timezone field for rendering; prevents misalignment in cross-region operations.  
+- **Observability Hooks**  
+  Structured logs with correlation IDs, initial latency metrics and error taxonomies to support SLO definition (planned p95 targets pre‑launch).  
+- **Pluggable Billing (Future)**  
+  Stripe (or provider abstraction) adapter boundary defined in architecture; billing events decoupled from core ticket issuance logic.  
+
+## Technologies Used
+
+- **Backend Core (TypeScript + Next.js App Router)**: Server Components + Server Actions for secure mutations in dashboard context.  
+- **PostgreSQL (Supabase)**: Primary data store with constraints, RLS policies, generated columns, partial indexes for high‑selectivity filters (status, event_id, ticket_type).  
+- **PL/pgSQL Functions**: Encapsulated domain transitions (issue_ticket, transition_event_state) to ensure invariants live inside the database boundary.  
+- **Edge Functions (Planned)**: Lightweight validation & webhook dispatch logic executed close to clients (scan latency reduction).  
+- **Tailwind CSS + Design System Tokens**: Consistent, themeable UI baseline.  
+- **React Hook Form + Zod**: End-to-end schema validation (server + client) with type inference.  
+- **Supabase Auth**: Auth + JWT claims extended with capability sets for permission resolution.  
+- **Row-Level Security & Policies**: Strict tenant isolation & scoped staff operations.  
+- **Webhooks (Planned)**: Signed HMAC headers + replay protection for idempotent external consumption.  
+- **Background Jobs (Planned)**: Queue for deferred tasks (batch exports, analytics materialization, ticket PDF generation).  
+- **CI Quality Gates (Planned)**: Type checks, migration drift detection, integration tests, performance smoke checks.  
+
+## Challenges and Learnings
+
+1. **Permission Explosion**  
+   Simple role checks escalated quickly. Solution: define a stable capability taxonomy early (CREATE, UPDATE, OVERRIDE, EXPORT) → map to roles; reduces branching logic.
+
+2. **RLS and Performance**  
+   Row-Level Security can hide index inefficiencies. Adding composite indexes and explicit predicate alignment (tenant_id, event_id, status) preserved query speed under RLS filters.
+
+3. **Mutable State vs. Immutable Audit**  
+   Tickets change owners, states and metadata; naive overwrites degrade traceability. Chose “current row + append audit event” pattern to retain lineage while keeping primary queries fast.
+
+4. **Event Lifecycle Consistency**  
+   Avoiding partial transitions required atomic DB functions performing validation + state mutation + audit insert, preventing half-complete updates.
+
+5. **Export Timing vs. Freshness**  
+   Real-time webhooks plus scheduled batch exports needed idempotency (event fingerprints) and replay protection to avoid duplicated downstream ingestion.
+
+6. **Scanning Future Constraints**  
+   Designing scanning before building it: structured SCAN_EVENT schema drafted early to guarantee extension (device_id, geo_hash, latency_ms) without redesign.
+
+7. **Avoiding Premature Microservices**  
+   Kept internal domain boundaries modular; resisted splitting scanning, analytics, billing prematurely—reducing operational overhead while clarity remains.
+
+8. **Analytics Accuracy**  
+   Early temptation: compute aggregates on-the-fly. Shifted to staged tables + future materialization pipeline; ensures predictable performance as data volume grows.
+
+## Outcome
+
+NexoEvent is actively under development. Current state:
+- Core data model (events, tickets, roles/capabilities, audit events) shaped & validated.
+- RLS policies drafted; initial permission resolution integrated with auth layer.
+- State transition & issuance functions prototyped.
+- Observability baseline (structured logs + correlation IDs) in place; metrics scaffolding planned.
+
+Next milestones:
+- Implement scanning session workflow + signed ephemeral keys.
+- Webhook delivery & retry subsystem.
+- Analytics materialization strategy (incremental refresh).
+- Export scheduling + billing adapter integration (optional phase).
+- Harden audit immutability (hash chain / signature approach).
+
+NexoEvent’s architecture positions it for secure multi‑tenant growth, operational transparency and integration‑friendly expansion—even prior to public launch.
+
+*Status:* Ongoing — not yet publicly released; domains being hardened iteratively before scaling & service extraction.

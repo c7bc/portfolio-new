@@ -1,0 +1,142 @@
+---
+title: "NexoAI – Orchestrating Multi‑Provider LLM Workflows & a Repository‑Aware Coding Agent"
+publishedAt: "2025-09-05"
+summary: "Building a multi‑tenant AI orchestration platform with prompt versioning, embeddings retrieval, provider abstraction, cost controls and a repository‑aware coding assistant. (In active development)"
+images:
+  - "/images/projects/nexoai/cover-01.jpg"
+team:
+  - name: "Daniel Neri"
+    role: "Founder & CEO / Platform Engineer"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/daniel-neri-51a7b12b3/"
+status: "In Development"
+---
+
+## Overview
+
+NexoAI is a platform for orchestrating AI interactions across multiple LLM providers while offering a repository‑aware coding agent and retrieval‑augmented features.  
+Core goals: consistency, cost transparency, reproducibility, extensibility.
+
+It unifies:
+- Prompt lifecycle & versioning with diff history
+- Multi‑provider abstraction (strategy & fallback routing)
+- Embeddings + semantic retrieval (code, docs, metadata)
+- Repository intelligence (structure map, dependency graph, change impact hints)
+- Streaming responses + long‑running job queue
+- Guardrails (rate limiting, toxicity / length filters, token budget caps)
+- Usage & cost telemetry (per org / user / model)  
+- Extensible tool / plugin layer (planned) enabling code edits, file scaffolds, refactor suggestions
+
+The architecture emphasizes deterministic execution envelopes: each inference (or agent run) is traceable with prompt template, resolved variables, model config, retrieval context snapshot and cost estimation.
+
+## Key Features
+
+- **Provider Abstraction Layer**  
+  Unified interface for OpenAI / Anthropic / local (planned). Supports capability probing (supports_json, supports_tools) and dynamic fallback if primary fails or SLA degraded.
+
+- **Prompt Versioning & Template Engine**  
+  Stored templates with typed variables, metadata (purpose, domain, safety notes). Version diff UI planned; immutable “execution record” referencing template + variable set.
+
+- **Embedding & Retrieval Core**  
+  pgvector (or equivalent) storing chunked code, README segments, architectural docs, issue summaries. Retrieval pipeline ranks by hybrid (semantic + keyword) score. Context packing applies token budget heuristics.
+
+- **Repository‑Aware Coding Agent**  
+  Pre‑analysis pass builds:
+  - File taxonomy & dependency graph
+  - Tech stack fingerprint (frameworks, build tools)
+  - Hotspot detection (recent churn, large functions)
+  Agent output: patch proposals, multi‑file diff scaffolds, architectural commentary, optional test stubs.
+
+- **Job Queue & Orchestrated Runs**  
+  Long operations (full repo contextualization, large refactors) dispatched to workers with heartbeat & cancellation tokens.
+
+- **Streaming & Partial State**  
+  WebSocket / SSE (planned) for incremental token output, intermediate reasoning steps (structured or redacted), progressive diff generation.
+
+- **Cost & Usage Telemetry**  
+  Metering per model: tokens_in, tokens_out, effective cost, fallback frequency, retrieval hit ratio. Enables per‑organization budgeting & anomaly alerts.
+
+- **Guardrails & Policies**  
+  Max token ceiling per tier, prompt length cutoff, output filtering (PII / profanity basic rules), rate limiting (leaky bucket / token bucket hybrid).
+
+- **Caching & Semantic Reuse**  
+  Embedding cache for queries; response cache for deterministic prompts (hash of template + variables + model). Avoids recomputation and lowers spend.
+
+- **Pluggable Tools (Planned)**  
+  Tools register capability schema (e.g. file_read, test_generate, dependency_analyze). Agent selects via scoring; execution context audited.
+
+- **Observability & Traceability**  
+  Structured events: PROMPT_EXECUTED, RETRIEVAL_QUERY, PROVIDER_FALLBACK, CACHE_HIT, AGENT_PATCH_GENERATED. Correlation IDs unify trace per user action.
+
+- **Multi‑Tenant Security**  
+  Org scoping at row level; API keys with rotating secrets & fine‑grained scopes (read:retrieval, exec:agent, admin:billing).
+
+## Technologies Used
+
+- **Backend (Go + TypeScript SDK)**: Go services for orchestration, queue workers & provider abstraction; TypeScript SDK for dashboard & integration clients.
+- **PostgreSQL + pgvector**: Storage of prompts, runs, embeddings, retrieval metadata & cost ledger.
+- **Queue (Planned: Redis / NATS)**: Async job dispatch, retries, dead letter capture for failed agent runs.
+- **Embeddings Pipeline**: Chunker (code heuristics, markdown sectioning), language detectors, hybrid scoring.
+- **LLM Providers**: Abstraction enabling dynamic timeouts, fallback chain & structured error taxonomy.
+- **Auth**: JWT / session with capability mapping; hashed API tokens; per‑org rate partitions.
+- **Caching**: In‑memory + persistent (Redis planned) keyed by semantic hash, plus TTL tuned by volatility.
+- **WebSocket / SSE Layer (Planned)**: Streaming token + event emission; client side incremental UI updates.
+- **Instrumentation**: Structured logging (zerolog), planned OpenTelemetry traces (span per provider call), metrics (p95 latency, token throughput, fallback rate).
+- **Diff & Patch Ops**: Unified patch schema (file path, operation, hunk preview) for deterministic application.
+- **CI/CD (Planned)**: Contract tests for provider adapters, load test harness for retrieval & embedding churn scenarios.
+
+## Challenges and Learnings
+
+1. **Provider Variability**  
+   Heterogeneous error formats & capability sets → standardized adapter contract + normalized error codes simplifies fallback logic & UI messaging.
+
+2. **Retrieval Quality Drift**  
+   Early naive semantic search over‑returned boilerplate. Introducing hybrid scoring & code‑aware chunk splitting (AST / heuristic boundaries) increased relevance.
+
+3. **Context Budget Optimization**  
+   Overstuffed contexts inflated cost. Token budget allocator ranks segments by recency + semantic score + structural weight (e.g. core module > test). Reduced average prompt size without accuracy loss.
+
+4. **Diff Generation Reliability**  
+   LLM hallucinated patch formats. Solution: schema‑first instructions + post‑validation & selective regeneration of invalid hunks.
+
+5. **Cost Transparency**  
+   Hidden usage patterns (e.g. repeated identical prompts). Semantic & exact cache layer shaved redundant inference spend; surfaced “cacheable prompt” suggestions.
+
+6. **Concurrency & Idempotency**  
+   Rapid repeated agent triggers risked race conditions on repo state snapshots. Introduced run “snapshot locks” and idempotent run tokens.
+
+7. **Security & Data Isolation**  
+   Embeddings could leak cross‑org context if pooled. Strict namespace partition & separate vector spaces per org eliminated cross contamination risk.
+
+8. **Over‑Engineering Pressure**  
+   Deferred full tool‑calling reasoning graph until baseline adoption; focused on modular primitives (retrieval, diff emission) first.
+
+9. **Telemetry Granularity**  
+   Too granular logs increased noise. Shifted to event taxonomy with structured payload envelope, enabling selective sampling.
+
+10. **Scaling Embedding Updates**  
+    Large repositories rebuild slowly. Implement incremental refresh: track file content hash; only re‑embed changed segments.
+
+## Outcome
+
+Current state (in development):
+- Prompt template & execution record model implemented.
+- Provider abstraction (primary + fallback) scaffolded; partial adapters operational.
+- Embedding ingestion prototype for code & docs; hybrid retrieval scoring draft.
+- Preliminary repository introspection (file graph + stack fingerprint).
+- Patch schema defined; constrained diff generation pipeline under refinement.
+- Cost ledger & per‑org usage metrics foundation established.
+- Guardrail policies (token ceilings, basic filters) in place; advanced moderation pending.
+- Observability baseline (structured events + correlation). Tracing & richer dashboards planned.
+
+Upcoming milestones:
+- Full streaming channel (token + intermediate reasoning frames).
+- Tool/plugin framework & first internal tools (test generator, dependency impact).
+- Incremental embedding refresh & background scheduler.
+- Expanded guardrails (semantic toxicity heuristics, rate fairness).
+- Billing & budget alerts integration.
+- Advanced ranking for retrieval (RRF / vector + BM25 hybrid tunables).
+
+NexoAI is not publicly launched yet; platform hardening prioritizes determinism, safety, and cost efficiency before external onboarding.
+
+*Status*: Ongoing — iterative stability & reliability work preceding broader release.

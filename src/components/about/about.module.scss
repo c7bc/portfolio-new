@@ -1,0 +1,36 @@
+@use "../breakpoints.scss" as breakpoints;
+
+.hover {
+    transition: var(--transition-micro-medium);
+
+    &:hover {
+        transform: translateX(var(--static-space-4));
+    }
+}
+
+.avatar {
+    position: sticky;
+    height: fit-content;
+    top: var(--static-space-64);
+}
+
+.avatar img {
+    border-radius: 100%;
+    object-fit: cover;
+    border: 2px solid var(--brand-on-background-weak); // borda personalizada
+    box-sizing: border-box;
+}
+
+@media (max-width: breakpoints.$s) {
+    .avatar {
+        top: auto;
+    }
+
+    .textAlign {
+        text-align: center;
+    }
+
+    .blockAlign {
+        align-self: center;
+    }
+}

@@ -1,0 +1,97 @@
+{
+  "navigation": {
+    "home": "Home",
+    "about": "About",
+    "work": "Work",
+    "blog": "Blog",
+    "gallery": "Gallery"
+  },
+  "ui": {
+    "passwordProtected": "This page is password protected",
+    "password": "Password",
+    "submit": "Submit",
+    "incorrectPassword": "Incorrect password",
+    "notFoundTitle": "Page Not Found",
+    "notFoundDescription": "The page you are looking for does not exist."
+  },
+  "home": {
+    "latestFromBlog": "Latest from the blog",
+    "earlierPosts": "Earlier posts",
+    "title": "{name}'s Portfolio",
+    "description": "Portfolio website showcasing my work as a {role}",
+    "headline": "Engineering multi‑vertical platforms bridging design and code",
+    "subline": "I'm {name}, a product‑minded Software Engineer, crafting intuitive user experiences while architecting full end‑to‑end systems. After hours, I build my own platforms across gaming, AI, marketplaces, events and agro.",
+    "featuredWork": "Featured work"
+  },
+  "newsletter": {
+    "title": "Subscribe to {firstName}'s Newsletter",
+    "description": "Weekly insights on architecture, AI orchestration and product engineering",
+    "subscribe": "Subscribe",
+    "emailPlaceholder": "Email",
+    "invalidEmail": "Please enter a valid email address."
+  },
+  "post": {
+    "recentPosts": "Recent posts",
+    "onThisPage": "On this page"
+  },
+  "about": {
+    "scheduleCall": "Schedule a call",
+    "introDescription": "{name} is a Brazil‑based {role} focused on turning complex product ideas into cohesive, scalable software ecosystems. Their work spans interface architecture, distributed backends, multi‑tenant SaaS, AI feature integration and domain modeling across several verticals.",
+    "work": {
+      "experiences": {
+        "fly": {
+          "role": "Senior Design Engineer",
+          "achievement1": "Redesigned the platform UI/UX resulting in a 20% increase in user engagement and 30% faster load times.",
+          "achievement2": "Led AI tool integration in design workflows enabling teams to iterate 50% faster."
+        },
+        "creativ3": {
+            "role": "Lead Designer",
+            "achievement1": "Developed a design system unifying the brand across multiple surfaces, improving design consistency by 40%.",
+            "achievement2": "Led a cross‑functional team launching a new product line contributing to a 15% increase in company revenue."
+        }
+      }
+    },
+    "studies": {
+      "universityofjakarta": {
+        "description": "Studied software engineering."
+      },
+      "buildthefuture": {
+        "description": "Studied online marketing and personal branding."
+      }
+    },
+    "technical": {
+      "skills": {
+        "figma": {
+          "description": "Prototyping in Figma with component systems and tokens at high velocity."
+        },
+        "nextjs": {
+          "description": "Building modern apps with Next.js + design systems + cloud-backed persistence."
+        }
+      }
+    }
+  },
+  "sections": {
+    "about": {
+      "title": "About – {name}",
+      "description": "Meet {name}, {role} from {location}",
+      "introduction": "Introduction",
+      "workExperience": "Work Experience",
+      "studies": "Studies",
+      "technicalSkills": "Technical skills"
+    },
+    "blog": {
+      "title": "Writing about design and tech...",
+      "description": "Read what {name} has been up to recently"
+    },
+    "work": {
+      "title": "Projects – {name}",
+  "description": "Design and dev projects by {name}",
+  "back": "Projects",
+  "related": "Related projects"
+    },
+    "gallery": {
+      "title": "Photo gallery – {name}",
+      "description": "A photo collection by {name}"
+    }
+  }
+}

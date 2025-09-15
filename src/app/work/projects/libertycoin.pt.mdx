@@ -1,0 +1,99 @@
+---
+title: "LibertyCoin – Dashboard Web3 de Carteiras & Operações de Tokens (Freelance)"
+publishedAt: "2025-09-03"
+summary: "Entrega freelance de um dashboard Web3 integrando conexão de carteira, agregação de saldos, histórico de transações, interações de contrato e painel admin; construído com Next.js, Express e SDKs on‑chain mais design completo em Figma."
+images:
+  - "/images/projects/libertycoin/cover-01.jpg"
+  - "/images/projects/libertycoin/cover-02.jpg"
+team:
+  - name: "Daniel Neri"
+    role: "Freelancer Full‑Stack & Designer de Produto"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/daniel-neri-51a7b12b3/"
+engagement: "Freelance"
+status: "Entregue (Melhorias Pontuais)"
+---
+
+## Visão Geral
+
+LibertyCoin é um dashboard de operações Web3 que fornece:
+- Conexão de carteiras EVM (MetaMask / WalletConnect)
+- Agregação de saldos multi‑token + equivalentes em fiat
+- Execução segura de métodos de contrato (read/write selecionados)
+- Acompanhamento de transações em tempo real
+- Painel admin para distribuição (airdrops) / campanhas
+
+Escopo: MVP rápido → endurecimento produtivo. Atuação completa: descoberta → design em Figma → frontend (Next.js) → backend (Express) → integrações e QA em testnets.
+
+## Principais Funcionalidades
+
+- **Camada de Conexão de Carteira**  
+  Componente unificado, detecção de mismatch de rede, sugestão de switch.
+
+- **Agregação de Saldos**  
+  Multicall para balanceOf + metadata; conversão fiat via API consolidada (cache de taxa).
+
+- **Rastreamento de Transações**  
+  Estados pendente → minerada → confirmada (N blocos) com streaming incremental e notificações.
+
+- **Console de Interação de Contrato**  
+  Métodos whitelisted com geração automática de formulário, validação tipada e estimativa de gas.
+
+- **Snapshot & Histórico**  
+  Tabela periódica de snapshots para gráficos de variação; histórico enriquecido decodificando assinatura de função.
+
+- **Distribuição de Tokens (Airdrop)**  
+  Upload CSV (endereço, quantia) → validação incremental → execução em lote ou preparação de lista de claim (stub futuro).
+
+- **Papéis / Permissões Simples**  
+  Flag admin controla rotas de distribuição.
+
+- **Design System (Figma → Código)**  
+  Tokens de cor, tipografia, spacing, componentes base; export JSON consumido no styling.
+
+- **Erros e Reverts**  
+  Decodificação de revert reason exibida de forma amigável.
+
+## Tecnologias Utilizadas
+
+- **Next.js**: SSR/rotas dinâmicas (/tx/[hash]), dashboard autenticado.
+- **Express**: API para RPC proxy, rate limit, verificação de assinatura.
+- **Ethers.js / Web3**: Providers, interfaces de contrato, multicall.
+- **TypeScript**: Tipagem compartilhada.
+- **Redis (Opcional)**: Cache de preços, tx recentes, limites.
+- **PostgreSQL**: Usuários, snapshots, logs admin.
+- **Figma**: Biblioteca de componentes & tokens.
+- **Zod**: Validação de parâmetros de write e CSV admin.
+- **Wagmi / WalletConnect (se habilitado)**: Simplificação de fluxo de conexão.
+
+## Desafios e Aprendizados
+
+1. **Variação de Latência RPC** – Mitigado com fallback + batching.  
+2. **Precisão de Estimativa de Gas** – Re‑estimativa near confirm reduz falhas.  
+3. **Exposição Segura de ABI** – Allowlist controlou risco de misuse.  
+4. **Consistência de Snapshot** – snapshot_version evita corrida.  
+5. **Drift de Conversão Fiat** – Cache server-side reduz jitter.  
+6. **UX de Erros On‑Chain** – Decodificação reduz suporte manual.  
+7. **Escalabilidade de Airdrop** – Parse streaming evitou travar thread.  
+8. **Superfície de Segurança** – Sanitização e checksummed addresses.
+
+## Resultado
+
+Entregue:
+- MVP produtivo (conexão, saldos, transações, console).  
+- Scaffold de airdrop + validação CSV.  
+- Design system completo aplicado.  
+- Logs estruturados + métricas básicas.
+
+Impacto: redução de fricção operacional e centralização de ações comuns de token.
+
+*Status*: Entregue; possíveis evoluções (Merkle claim, multi‑chain, push notifications).
+
+---
+
+## (Futuro Opcional)
+
+- Builder de merkle airdrop  
+- Agregação multi‑chain  
+- WebSocket para status de tx  
+- Flags de risco (liquidez baixa)
