@@ -7,9 +7,14 @@ const withMDX = mdx({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "standalone",
+  
   pageExtensions: ["ts", "tsx", "md", "mdx"],
   transpilePackages: ["next-mdx-remote"],
+  experimental: {
+    outputFileTracingIncludes: {
+      '/**/*': ['./src/app/work/projects/**/*.mdx', './src/app/blog/posts/**/*.mdx'],
+    },
+  },
   images: {
     remotePatterns: [
       {

@@ -43,6 +43,14 @@ const RouteGuard: React.FC<RouteGuardProps> = ({ children }) => {
       };
 
       const normalized = normalizePath(pathname);
+      // Debug logs to help diagnose production pathname vs normalized path
+      try {
+        // Use console.debug so it's easy to filter in DevTools
+        // eslint-disable-next-line no-console
+        console.debug("RouteGuard: raw pathname:", pathname, "normalized:", normalized);
+      } catch (e) {
+        // noop
+      }
 
       const routeEnabled = (() => {
         if (!normalized) return false;
