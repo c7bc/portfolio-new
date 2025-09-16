@@ -61,7 +61,7 @@ const social: Record<L, Social> = {
 const home: Record<L, Home> = {
   en: {
     path: "/",
-    image: "/images/d-logo.svg",
+    image: "/images/og/home.jpg",
     label: "Home",
     title: `${person.en.name}'s Portfolio`,
     description: `Portfolio website showcasing work as a ${person.en.role}`,
@@ -88,7 +88,7 @@ const home: Record<L, Home> = {
   },
   pt: {
     path: "/",
-    image: "/images/d-logo.svg",
+    image: "/images/og/home.jpg",
     label: "Início",
     title: `Portfólio de ${person.pt.name}`,
     description: `Site portfólio mostrando meu trabalho como ${person.pt.role}`,
