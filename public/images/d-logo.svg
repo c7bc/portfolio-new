@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%" role="img" aria-label="D minimal logo verde">
+  <!-- D geométrico minimalista em verde -->
+  <rect x="30" y="30" width="40" height="140" rx="8" fill="#00aa44"/>
+  <path d="M70 30 A70 70 0 0 1 70 170 L70 30 Z" fill="#00aa44"/>
+</svg>
+

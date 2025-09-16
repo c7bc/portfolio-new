@@ -132,6 +132,8 @@ export default async function RootLayout({
             `,
           }}
         />
+  <link rel="icon" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/favicon.svg" />
       </head>
       <Providers>
         <I18nProvider locale={locale} messages={messages}>
