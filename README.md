@@ -1,58 +1,33 @@
-# Daniel Neri — Portfolio
+# Daniel Neri - Portfolio
 
-This repository hosts my personal portfolio website built with Next.js, MDX and Once UI.
+Bilingual developer portfolio: https://danielneri.pro/pt and /en.
 
-Live demo: (deployed site or local) — this project serves a responsive portfolio showcasing projects, blog posts and a short about/CV.
+## Run
 
-![Daniel Neri Portfolio](public/images/home.jpg)
-
-## Tech stack
-
-- Next.js (App Router)
-- MDX for content-driven pages (projects / blog)
-- Once UI for design tokens and UI primitives
-- TypeScript
-
-## Quick start
-
-1. Clone the repository
-
-```bash
-git clone https://github.com/c7bc/portfolio-new.git
-```
-
-1. Install dependencies
-
-```bash
-npm install
-```
-
-1. Run dev server
-
-```bash
+```sh
+npm ci
 npm run dev
 ```
 
-1. Edit site content
+Validation: `npm run typecheck` and `npm run build`.
 
-Modify `src/resources/content.tsx` to update personal details, links and the OG image used in metadata.
+## Current structure
 
-1. Add blog post or project
+- `src/components/Portfolio.tsx`: Portuguese/English copy, projects, filters, engineering studies and contact.
+- `src/components/HeroSculpture.tsx`: interactive Three.js metal ribbon, with generated-art fallback.
+- `src/app/portfolio.css`: responsive visual identity, motion and reduced-motion support.
+- `src/app/[locale]/page.tsx`: static routes and localized metadata.
+- `public/media`: optimized identity artwork, approved portrait and actual website captures.
+- `public/resume`: selectable-text resumes, PT/EN, with optional visual/photo versions.
 
-Create a new `.mdx` file under `src/app/blog/posts` or `src/app/work/projects`.
+Zapyflow is under ongoing development. Vettano is undergoing a React-to-Godot/C# reboot; its captures show the current redesign provided by Daniel. Infinity Boost and Kalevo are archived partnership projects. Kalevo uses an actual capture from kalevo.com.br; Infinity Boost uses product screenshots from Daniel’s LinkedIn post. NexoAgro is not presented as implementation experience.
 
-## Author
+## Design and provenance
 
-Daniel Neri — Software & Product Engineer
+The October 2026 redesign uses a graphite/ivory/chartreuse palette, editorial typography and an interactive procedural Three.js ribbon with generated satin-metal artwork as fallback. Section mockups are design references; the live site uses real HTML text and controls. Fonts: DM Sans and Instrument Serif. Portrait selected by Daniel; no colored lighting on the portrait.
 
-GitHub: [https://github.com/c7bc](https://github.com/c7bc)
+This repository originated from a Next.js / Once UI portfolio. The original source is retained in Git history; some unused template components remain for compatibility. The former MDX/blog routes were retired as part of the redesign. The MDX dependency was updated to 6.x to resolve the prior Vercel deployment block. Existing license: see LICENSE (CC BY-NC 4.0).
 
-## Notes
+## Deployment
 
-- The project uses Next.js metadata helpers (server-side) to generate Open Graph metadata. The OG image is configured in `src/resources/content.tsx`.
-- Social preview caches (Facebook / Twitter) may need clearing if you change the OG image.
-- If you want a raster OG image for broader social compatibility, I can generate a 1200×630 JPG and place it at `public/images/og/home.jpg`.
-
----
-
-License: see `LICENSE`
+Next.js framework on the existing Vercel project `portfolio-new`. Main branch is production. Existing legacy /about, /work, /blog and /gallery URLs redirect to the portfolio sections.

@@ -1,12 +1,13 @@
 {
-  "name": "@once-ui-system/magic-portfolio",
+  "name": "daniel-neri-portfolio",
   "version": "2.3.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "biome-write": "npx @biomejs/biome format --write .",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint src/components/Portfolio.tsx src/app/[locale]/page.tsx",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.0",
@@ -17,11 +18,12 @@
     "gray-matter": "^4.0.3",
     "lint-staged": "^16.1.5",
     "next": "15.3.8",
-    "next-mdx-remote": "^5.0.0",
+    "next-mdx-remote": "^6.0.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-icons": "^5.5.0",
     "sass": "^1.86.3",
+    "three": "^0.186.1",
     "transliteration": "^2.3.5"
   },
   "devDependencies": {
@@ -30,6 +32,7 @@
     "@types/node": "^20.17.30",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@types/three": "^0.186.0",
     "@typescript-eslint/eslint-plugin": "^8.43.0",
     "@typescript-eslint/parser": "^8.43.0",
     "eslint": "^9.25.0",

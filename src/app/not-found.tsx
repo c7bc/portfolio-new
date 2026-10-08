@@ -1,18 +1,2 @@
-"use client";
-import { Column, Heading, Text } from "@once-ui-system/core";
-import { useI18n } from "@/i18n/I18nProvider";
-
-export default function NotFound() {
-  const { t } = useI18n();
-  return (
-    <Column as="section" fill center paddingBottom="160">
-      <Text marginBottom="s" variant="display-strong-xl">
-        404
-      </Text>
-      <Heading marginBottom="l" variant="display-default-xs">
-        {t("ui.notFoundTitle")}
-      </Heading>
-      <Text onBackground="neutral-weak">{t("ui.notFoundDescription")}</Text>
-    </Column>
-  );
-}
+import Link from 'next/link';
+export default function NotFound(){return <main className="error-page"><span className="eyebrow">404</span><h1>Vamos voltar ao início.</h1><Link className="button primary" href="/pt">Daniel Neri ↗</Link></main>}

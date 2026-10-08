@@ -1,0 +1,6 @@
+# Binary portfolio documents and images
+*.pdf binary
+*.webp binary
+*.png binary
+*.jpg binary
+*.ico binary
