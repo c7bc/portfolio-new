@@ -1,0 +1,23 @@
+html,body{background:#000}
+.site-v3{--surface:#000}
+.site-v3 .hero-vignette{background:linear-gradient(0deg,var(--surface) 0%,var(--surface) 2%,color-mix(in srgb,var(--surface) 96%,transparent) 8%,color-mix(in srgb,var(--surface) 76%,transparent) 16%,color-mix(in srgb,var(--surface) 38%,transparent) 27%,transparent 43%,transparent 80%,#17191666 100%)}
+.contour-rotation{transform-origin:700px 400px;animation:contour-orbit 200s linear infinite;will-change:transform}
+@keyframes contour-orbit{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.geometry-cluster{width:100%;max-width:520px;align-self:center;color:var(--copy);padding-top:10px}
+.geometry-cluster>svg{display:block;width:100%;height:auto;overflow:visible;stroke:currentColor;stroke-width:.9;stroke-linecap:round;stroke-linejoin:round;opacity:.73}
+.geometry-cluster .geometry-spin{transform-box:fill-box;transform-origin:center;animation:geometry-turn 80s linear infinite}
+.geometry-cluster .geometry-spin-reverse{animation-direction:reverse;animation-duration:110s}
+@keyframes geometry-turn{to{transform:rotate(360deg)}}
+.site-v3 .bento-brand .project-brand-icon{display:block;width:45%;height:45%;max-width:170px;max-height:180px;object-fit:contain;transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.site-v3 .bento-brand:hover .project-brand-icon{transform:translateY(-4px) scale(1.04)}
+.case-live-links{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.case-live-links .reference-outline{font-size:13px;min-height:42px;padding:10px 18px}
+.case-live-links a:first-child{background:var(--copy);color:var(--surface)}
+.case-live-links a:first-child:hover{background:var(--lime);border-color:var(--lime);color:#121212}
+.site-v3 .service-panel-image{width:100%;height:auto;aspect-ratio:1;background:#000;display:block;border:1px solid #ffffff0b;border-radius:4px}
+.site-v3 .service-panel-image img{display:block;width:100%;height:100%;object-fit:contain;transform:none;transition:transform .8s cubic-bezier(.2,.8,.2,1)}
+.site-v3 .service-panel-image:hover img{transform:scale(1.025)}
+.site-v3 .image-dialog{background:#000000f5}
+[data-motion=off] .contour-rotation,[data-motion=off] .geometry-spin{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){.contour-rotation,.geometry-cluster .geometry-spin{animation:none;will-change:auto}}
+@media(max-width:700px){.geometry-cluster{max-width:470px;padding:0;margin:0 auto 10px}.site-v3 .bento-brand .project-brand-icon{width:42%;height:42%;max-height:90px}.case-live-links{margin-top:22px}.case-live-links .reference-outline{font-size:12px}.site-v3 .service-panel-image{height:auto;aspect-ratio:1}}

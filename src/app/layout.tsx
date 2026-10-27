@@ -1,5 +1,10 @@
 import type { Metadata } from 'next';
 import './portfolio.css';
+import './site-pages.css';
+import './reference.css';
+import './internals.css';
+import './detail-pass.css';
+import './product-artwork.css';
 export const metadata: Metadata = {
  metadataBase: new URL('https://danielneri.pro'),
  title: { default: 'Daniel Neri — Full Stack Developer', template: '%s | Daniel Neri' },

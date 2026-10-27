@@ -1,0 +1,44 @@
+'use client';
+import Image from 'next/image';
+import Link from 'next/link';
+import {useRef,useState} from 'react';
+import {SiReact,SiNextdotjs,SiTypescript,SiGo,SiGodotengine,SiPostgresql,SiRedis,SiNatsdotio,SiDocker,SiKubernetes,SiCloudflare,SiBun,SiPython,SiGit} from 'react-icons/si';
+import {projects,type Locale,type Project} from './project-data';
+
+export function Contours(){return <svg className="contour-art" viewBox="0 0 1400 800" fill="none" aria-hidden="true"><g className="contour-rotation"><path d="M-180-120C-20 800 850 770 1000 80S1480-320 1600 300M-280-120C-120 900 950 870 1100 80S1580-320 1700 300M-380-120C-220 1000 1050 970 1200 80S1680-320 1800 300"/><ellipse cx="300" cy="-200" rx="450" ry="410"/><ellipse cx="1150" cy="80" rx="450" ry="610" transform="rotate(-28 1150 80)"/></g></svg>;}
+export function ShapeGarden(){return <div className="geometry-cluster" aria-hidden="true"><svg viewBox="0 0 560 330" fill="none">
+ <g transform="translate(15 10)"><path d="M57 4A55 55 0 0 0 57 114V99A40 40 0 0 1 57 19ZM75 4A55 55 0 0 1 75 114V99A40 40 0 0 0 75 19Z"/></g>
+ <g transform="translate(139 117)"><g className="geometry-spin"><path d="M40 38C-9 4 16-37 39-10C51 4 44 24 40 38ZM44 42C78-7 119 18 92 41C78 53 58 46 44 42ZM40 46C89 80 64 121 41 94C29 80 36 60 40 46ZM36 42C2 91-39 66-12 43C2 31 22 38 36 42Z"/></g></g>
+ <g transform="translate(295 2)"><path d="M0 0H106V106H0ZM53 0V106M0 53H106M0 53A53 53 0 0 0 53 0M53 106A53 53 0 0 1 106 53M0 53A53 53 0 0 1 53 106"/></g>
+ <g transform="translate(457 49) rotate(-35)"><rect x="-22" y="-65" width="42" height="42"/><rect x="-65" y="-21" width="42" height="42"/><rect x="23" y="-21" width="42" height="42"/><rect x="-22" y="23" width="42" height="42"/></g>
+ <path d="M18 174H127A55 55 0 0 1 18 174ZM18 282H127A55 55 0 0 0 18 282Z"/>
+ <g transform="translate(226 255)"><g className="geometry-spin geometry-spin-reverse">{Array.from({length:20},(_,i)=><path key={i} d="M-3-54H3L2-20H-2Z" transform={`rotate(${i*18})`}/>)}</g></g>
+ <g transform="translate(323 144)"><path d="M0-19 14-8 28-19V11L47 11 37 26 47 41H17V60L2 50-13 60V30H-32L-22 15-32 0H0Z"/></g>
+ <g transform="translate(404 210)"><circle r="52"/><ellipse rx="43" ry="52"/><ellipse rx="24" ry="52"/><circle r="5"/></g>
+ <g transform="translate(321 283)"><path d="M-51 0Q0-51 51 0Q0 51-51 0Z"/><circle r="20"/></g>
+ <path d="M484 231Q494 264 531 275Q494 286 484 319Q474 286 437 275Q474 264 484 231Z"/>
+ </svg></div>;}
+
+
+export function StackCloud({locale}:{locale:Locale}){
+ const [filter,setFilter]=useState('all');
+ const categories=[['all',locale==='pt'?'Tudo':'All'],['frontend','Frontend'],['backend','Backend'],['infra',locale==='pt'?'Infraestrutura':'Infrastructure'],['ai',locale==='pt'?'IA & ferramentas':'AI & tools']];
+ const tools=[{name:'React',icon:SiReact,group:'frontend',color:'#8ed0df'},{name:'TypeScript',icon:SiTypescript,group:'frontend',color:'#85ade4'},{name:'Next.js',icon:SiNextdotjs,group:'frontend',color:'#e2e2d9'},{name:'Godot / C#',icon:SiGodotengine,group:'frontend',color:'#97c0df'},{name:'Go',icon:SiGo,group:'backend',color:'#89d1df'},{name:'PostgreSQL',icon:SiPostgresql,group:'backend',color:'#86abc9'},{name:'Redis',icon:SiRedis,group:'backend',color:'#e1a7a3'},{name:'NATS',icon:SiNatsdotio,group:'backend',color:'#a5d0b8'},{name:'Docker',icon:SiDocker,group:'infra',color:'#96bff5'},{name:'Kubernetes',icon:SiKubernetes,group:'infra',color:'#99b4ea'},{name:'Cloudflare',icon:SiCloudflare,group:'infra',color:'#ebbd87'},{name:'AWS',icon:null,group:'infra',color:'#e2c19c'},{name:'Python',icon:SiPython,group:'ai',color:'#d9c284'},{name:'Bun',icon:SiBun,group:'backend',color:'#e6d5c8'},{name:'Git',icon:SiGit,group:'ai',color:'#e7a293'},{name:'LLMs',icon:null,group:'ai',color:'#b4d7bb'}];
+ return <section className="stack-section content-width"><div className="split-heading"><h2>{locale==='pt'?'Tecnologia a serviço':'Tools and technology'}<br/><em>{locale==='pt'?'do produto.':'behind the work.'}</em></h2><p>{locale==='pt'?'Uma stack que acompanha o problema. Uso interfaces web e clientes nativos, serviços em Go e TypeScript, bancos, filas e infraestrutura — com IA como ferramenta de desenvolvimento e como parte de produtos.':'A stack shaped by the problem. Web interfaces and native clients, Go and TypeScript services, databases, queues and infrastructure — with AI as a development tool and part of products.'}</p></div><div className="stack-filters">{categories.map(([id,label])=><button key={id} aria-pressed={filter===id} onClick={()=>setFilter(id)}>{label}</button>)}</div><div className="stack-cloud">{tools.map(tool=>{const Icon=tool.icon;return <div className={`stack-tool ${filter!=='all'&&filter!==tool.group?'is-dimmed':''}`} key={tool.name}><div style={{'--tool-color':tool.color} as React.CSSProperties}>{Icon?<Icon aria-hidden="true"/>:<span>{tool.name==='AWS'?'aws':'✳'}</span>}</div><span>{tool.name}</span></div>;})}</div></section>;
+}
+
+export function WorkIndex({locale,compact=false}:{locale:Locale;compact?:boolean}){
+ const [view,setView]=useState<'list'|'grid'>(compact?'grid':'list');
+ return <div className={`work-index index-${view} ${compact?'compact-index':''}`}><div className="index-toolbar"><span>{locale==='pt'?'05 projetos selecionados':'05 selected projects'}</span><div><button aria-pressed={view==='list'} onClick={()=>setView('list')}>{locale==='pt'?'Lista':'List'} ☰</button><button aria-pressed={view==='grid'} onClick={()=>setView('grid')}>{locale==='pt'?'Grade':'Grid'} ⊞</button></div></div><div className="index-entries">{projects.map((p,i)=><Link className={`index-entry entry-${p.id}`} key={p.id} href={`/${locale}/work/${p.id}`} style={{'--project-accent':p.accent} as React.CSSProperties}><figure className="index-preview"><Image src={p.gallery[0]||p.image} alt={p.name} width={1600} height={900} sizes="(max-width:700px) 88vw, 50vw"/><span>↗</span></figure><div className="index-entry-name"><h2>{p.name}</h2><span>{p.category[locale]}</span></div><span className="index-number">{String(i+1).padStart(2,'0')}</span></Link>)}</div></div>;
+}
+
+export function ProjectGallery({project,locale}:{project:Project;locale:Locale}){
+ const track=useRef<HTMLDivElement>(null),dialog=useRef<HTMLDialogElement>(null);const [image,setImage]=useState(project.gallery[0]);
+ const move=(dir:number)=>track.current?.scrollBy({left:dir*track.current.clientWidth*.85,behavior:'smooth'});
+ return <section className="case-gallery"><div className="gallery-bar content-width"><p>{locale==='pt'?'DENTRO DA EXPERIÊNCIA':'INSIDE THE EXPERIENCE'}</p><div><button aria-label={locale==='pt'?'Imagem anterior':'Previous image'} onClick={()=>move(-1)}>←</button><button aria-label={locale==='pt'?'Próxima imagem':'Next image'} onClick={()=>move(1)}>→</button></div></div><div className="gallery-track" ref={track} tabIndex={0} role="region" aria-label={locale==='pt'?'Galeria: use as setas para navegar':'Gallery: use arrow keys to navigate'} onKeyDown={e=>{if(e.key==='ArrowRight'){e.preventDefault();move(1);}if(e.key==='ArrowLeft'){e.preventDefault();move(-1);}}}>{project.gallery.map((src,i)=><button className="gallery-slide" key={src} aria-label={`${locale==='pt'?'Ampliar captura':'Enlarge capture'} ${i+1}`} onClick={()=>{setImage(src);dialog.current?.showModal();}}><Image src={src} alt={`${project.name} / ${i+1}`} width={1600} height={1000} sizes="(max-width:700px) 90vw, 75vw"/><span>0{i+1} / 0{project.gallery.length} <b>↗</b></span></button>)}</div><p className="gallery-caption content-width">{locale==='pt'?'Capturas reais do produto e ambientes de demonstração.':'Real product captures and demonstration environments.'}</p><dialog className="image-dialog" ref={dialog} onClick={e=>{if(e.target===e.currentTarget)dialog.current?.close();}}><button className="image-close" onClick={()=>dialog.current?.close()}>{locale==='pt'?'Fechar':'Close'} ×</button><Image src={image} alt={project.name} width={1920} height={1400} sizes="95vw"/></dialog></section>;
+}
+
+export function ArchitectureDiagram({project,locale}:{project:Project;locale:Locale}){
+ const tiers:Record<string,string[][]>={vettano:[['Godot / C#'],['Auth','Lobby','Matches','Social'],['NATS','Redis','PostgreSQL']],zapyflow:[['React / TypeScript'],['Fastify API','AI agents','Message queues'],['Prisma','WhatsApp API','Knowledge base']],orvunia:[['Desktop experience'],['Transcription','Context','AI models'],['History','Local core','Cloud services']],kalevo:[['Next.js / TypeScript'],['Events','Ticketing','QR validation'],['Supabase','PostgreSQL','Mux']],infinity:[['Next.js'],['Go / Gin','Orders','WebSocket'],['PostgreSQL','Stripe']]};
+ return <div className="architecture-diagram"><span className="diagram-label">{locale==='pt'?'VISÃO SIMPLIFICADA':'SIMPLIFIED VIEW'}</span>{tiers[project.id].map((tier,i)=><div className="diagram-tier" key={i}>{tier.map(node=><span key={node}>{node}</span>)}</div>)}</div>;
+}
