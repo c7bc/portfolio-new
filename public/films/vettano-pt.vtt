@@ -1,16 +1,22 @@
 WEBVTT
 
-00:00:00.000 --> 00:00:02.600
+00:00:00.000 --> 00:00:02.400
 Vettano. Desenhar, adivinhar e compartilhar.
 
-00:00:02.600 --> 00:00:07.230
-O ateliê no cliente Godot/C#, em desenvolvimento.
+00:00:02.400 --> 00:00:25.000
+Cliente Godot/C#: home, escolha de tema e modo de jogo.
 
-00:00:07.230 --> 00:00:11.860
-Galeria de desenhos em ambiente de demonstração.
+00:00:25.000 --> 00:00:26.800
+Demonstração local conectada ao backend, com bots controlados.
 
-00:00:11.860 --> 00:00:16.500
-Partidas, palpites e conversa. Interface de desenvolvimento.
+00:00:26.800 --> 00:00:33.800
+Entrada na sala local.
 
-00:00:16.500 --> 00:00:18.000
+00:00:33.800 --> 00:00:56.800
+Desenho recebido pelo servidor. Reprodução acelerada em 2x.
+
+00:00:56.800 --> 00:01:03.300
+Fim da rodada local.
+
+00:01:03.300 --> 00:01:05.500
 Design, engenharia e produto por Daniel Neri.

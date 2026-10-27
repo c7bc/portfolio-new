@@ -1,16 +1,22 @@
 WEBVTT
 
-00:00:00.000 --> 00:00:02.600
-Vettano. Draw, guess and belong.
+00:00:00.000 --> 00:00:02.400
+Vettano. Draw, guess and share.
 
-00:00:02.600 --> 00:00:07.230
-The atelier in the Godot/C# client, in development.
+00:00:02.400 --> 00:00:25.000
+Godot/C# client: home, themes and game modes.
 
-00:00:07.230 --> 00:00:11.860
-Drawing gallery in a demonstration environment.
+00:00:25.000 --> 00:00:26.800
+Local demo connected to the backend, with controlled bots.
 
-00:00:11.860 --> 00:00:16.500
-Matches, guesses and chat. Development interface.
+00:00:26.800 --> 00:00:33.800
+Entering the local room.
 
-00:00:16.500 --> 00:00:18.000
+00:00:33.800 --> 00:00:56.800
+Drawing received from the server. Playback accelerated to 2x.
+
+00:00:56.800 --> 00:01:03.300
+End of the local round.
+
+00:01:03.300 --> 00:01:05.500
 Design, engineering and product by Daniel Neri.
